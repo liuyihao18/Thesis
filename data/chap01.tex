@@ -27,6 +27,33 @@
   \label{fig:demodulation}
 \end{figure}
 
+物联网技术的重要支撑之一是无线通信技术。
+随着物联网的快速发展，无线通信技术已经逐渐融入到人们的日常生活之中。
+从计算机、手机等通信设备，到冰箱、洗衣机等家用电器，都实现了无线互联，极大地促进了信息的共享与交互。
+然而，随着无线通信技术的广泛应用，研究者开始思考：能否进一步拓展其功能，使无线信号不仅承担通信的任务，还具备环境感知的能力？
+基于这一思考，无线感知技术应运而生。
+如果无线信号能够同时用于感知，那么泛在的无线信号将成为获取信息的重要途径，使得信息的获取更加便捷。
+正是在这一愿景的驱动下，无线感知技术逐渐成为学术界与工业界的研究热点~\cite{智能物联网无线定位感知关键技术研究,基于RFID的无源物联网无线感知研究现状与发展趋势,基于Wi-Fi/5G信号的无线感知与定位方法研究}。
+
+在众多无线技术中，射频识别技术（RFID）~\cite{yang2016making, xie2020exploring,li2019towards, yang2017tagbeat, duan2018robust, wang2017poster, liang2023rf, zhao2020optimal}、无线保真（WiFi）~\cite{gui2023csi, xianjia2021just, wang2022indoor, soltanaghaei2021tagfi, kotaru2015spotfi,jiang2024willow, zeng2019farsense, hu2023muse}、超宽带（UWB）~\cite{yang2019multi, li2022fine, zheng2021more, yang2022vuloc}、调频连续波（FMCW）雷达~\cite{ahmad2018vital, islam2020non, turppa2020vital, zhang2023pi}以及可见光通信~\cite{li2015human, venkatnarayan2018gesture, an2015visible, xie2020litag}等，已经被广泛应用于各类无线感知场景，包括目标定位~\cite{kotaru2015spotfi, soltanaghaei2021tagfi, yang2022vuloc, xie2020litag, jiang2024willow}、振动检测~\cite{yang2016making, yang2017tagbeat, xie2020exploring, li2019towards}、呼吸监测~\cite{zeng2019farsense, yang2019multi, zheng2021more, li2022fine, ahmad2018vital, hu2023muse, islam2020non, turppa2020vital, zhang2023pi, li2015human}以及手势识别~\cite{venkatnarayan2018gesture, xianjia2021just, hu2023muse, xie2020litag}等应用领域。
+
+上述无线技术所采用的信号拥有不同的载波频率和带宽，因此各自具备不同的优势和局限性。
+然而，这些技术都存在感知距离受限的问题。
+这一问题的根源在于，无线感知通常依赖于物体的反射信号，而反射信号相较直接发射的信号要弱得多。
+对于传统通信而言，信号由发送端直接传输至接收端；而在无线感知中，信号需经由目标反射后再被接收端接收。
+由于信号在传播过程中会经历路径损耗，而感知信号的传播路径长于通信信号，因此信号能量衰减更为严重，导致感知距离显著短于通信距离。
+例如，WiFi的通信范围通常可达数十米，但其有效感知范围却只有约八米~\cite{zeng2019farsense}。
+
+为了克服感知距离受限的挑战 ，研究者们尝试引入远距离通信技术LoRa（Long Range）来扩展无线感知的有效范围。
+凭借LoRa优异的远距离通信能力，基于该技术的无线感知系统实现了最长约100米的感知距离~\cite{jiang2021sense}。
+
+尽管利用LoRa技术的无线感知方法在感知距离方面取得了显著进展，但其在多目标感知能力方面仍存在局限。
+例如，Sen-Fence~\cite{xie2020combating}与ChirpSen~\cite{xie2023boosting}系统需要在感知前预先获知目标的大致位置，这在动态环境中难以实现。
+张等人~\cite{zhang2021unlocking}采用波束成形（beam forming）方法以区分多个目标，但该方法分辨率受限，尤其在远距离场景下难以有效区分彼此接近的目标。
+Palantir系统~\cite{jiang2021sense}通过开关键控（OOK）反向散射标签增强感知能力，但其一次仅能处理单个标签信号。
+总体而言，现有研究尚未能很好地实现对多个目标的同时感知，限制了无线感知技术的应用范围。
+
+针对上述问题，本文提出了一种基于频移反向散射标签的远距离多目标运动特征感知方法。该方法同样利用LoRa技术以扩展感知范围，并结合频移反向散射标签反射信号的特性，在信号处理算法上进行了创新设计，使得系统能够区分不同目标的反射信号，从而实现多目标的同时感知与特征提取。该研究为无线感知技术在远距离场景下的多目标感知提供了一种可行的解决方案。
 
 \section{国内外研究现状}
 
