@@ -4,7 +4,74 @@
 
 \section{基础知识介绍}
 
+在本节中，将首先介绍无线信号的基础知识，然后介绍与本文相关的啁啾信号和反向散射信号的原理，接着介绍正交性的概念，最后介绍一种利用复向量理解信号的方式。
+
+\subsection{无线信号原理}
+
+无线信号是通过电磁波在空间中传播的信息载体，其传输过程包括信号的生成、调制、传播、接收和解调等环节。
+无线信号通常使用IQ调制，将原始基带信号分解为IQ两路分量分别调制在相位相差90$^\circ$的载波上进行传输。
+其中，I分量表示同相分量（In-Phase），Q分量表示正交分量（Quadrature）。
+虽然在现实世界中不会出现“虚数信号”，但是在信号处理领域中，仍然可以使用复数工具来简化计算过程。
+本文不具体展开IQ调制的原理，但在下面的章节中会使用复数工具来描述信号。
+
 \subsection{啁啾信号原理}
+
+LoRa广域网技术中使用啁啾信号作为基带信号来提高信号的抗干扰能力与传播距离。
+啁啾信号采用线性调频（Chirp Spreading Spectrum, CSS）的方式来编码信息，每一个符号的频率随时间线性变化。
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{chap02/chirp.pdf}
+    \caption{啁啾信号}
+    \label{fig:chirp}
+\end{figure}
+
+如图~\ref{fig:chirp}~所示，最基本的啁啾信号形式为上啁啾符号，其频率从$-\frac{BW}{2}$线性增长到$\frac{BW}{2}$，其中$BW$是啁啾信号的带宽。
+下啁啾符号是上啁啾符号的共轭形式（或者称为时间反转形式），其频率从$\frac{BW}{2}$线性下降到$-\frac{BW}{2}$。
+而一般的数据啁啾符号以初始频率$f_0$编码数据，其频率先从$f_0$线性增长到$\frac{BW}{2}$，然后卷绕回$-\frac{BW}{2}$，再从$-\frac{BW}{2}$线性增长到$f_0$。
+写成公式是：
+\begin{equation}
+    s_{\text{up}}(t) = e^{j2\pi\left(-\frac{BW}{2} t + \frac{1}{2}kt^2\right)},\ t \in [0, T)
+\end{equation}
+\begin{equation}
+    s_{\text{down}}(t) = e^{-j2\pi\left(-\frac{BW}{2} t + \frac{1}{2}kt^2\right)},\ t \in [0, T)
+\end{equation}
+\begin{equation}
+    s(t) =
+    \begin{cases}
+        e^{j2\pi\left(f_0 t + \frac{1}{2}kt^2\right)},\ t \in [0, t_\text{wrap}) \\
+        e^{j2\pi\left(-\frac{BW}{2} (t - t_\text{wrap}) + \frac{1}{2}k(t-t_\text{wrap})^2\right)},\ t \in [t_\text{wrap}, T)
+    \end{cases}
+\end{equation}
+
+其中，$k=\frac{BW}{T}$是频率变化的速率，$T$是啁啾符号的持续时间。
+LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩频因子（Spreading Factor, SF），其定义为：
+\begin{equation}
+    SF = \log_2(BW \cdot T)
+\end{equation}
+
+扩频因子决定了$f_0$的可能取值$f_n$，也决定了卷绕发生时间$t_\text{wrap}$的可能取值$t_n$，即：
+\begin{equation}
+    f_n = -\frac{BW}{2} + n \cdot \frac{BW}{2^{SF}},\ n = 0, 1, ..., 2^{SF}-1
+\end{equation}
+\begin{equation}
+    t_n = T - n \cdot \frac{T}{2^{SF}},\ n = 0, 1, ..., 2^{SF}-1
+\end{equation}
+
+通常情况下，扩频因子越大，啁啾符号的持续时间越长，信号的抗干扰能力越强，但传输速率越低。
+啁啾信号的解调过程是把接收到的啁啾信号与下啁啾信号相乘，将其转化为单频信号，然后通过傅里叶变换提取出该单频信号的初始频率$f_0$：
+\begin{equation}
+    \begin{aligned}
+        r(t) & = s(t) \cdot s_{\text{down}}(t)                               \\
+             & = \begin{cases}
+                     e^{j2\pi (f_0 + \frac{BW}{2}) t},\ t \in [0, t_\text{wrap}) \\
+                     e^{j2\pi (f_0 - \frac{BW}{2}) t},\ t \in [t_\text{wrap}, T)
+                 \end{cases}
+    \end{aligned}
+\end{equation}
+
+得益于啁啾信号的抗干扰特性，使用啁啾信号进行感知的系统在低信噪比环境下仍然能够有效地提取目标信息。
+本文也采用啁啾信号作为无线感知系统的基带信号，利用其优良的特性来增加无线感知的范围并提高无线感知的精度。
 
 \subsection{反向散射信号原理}
 
