@@ -75,7 +75,162 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
 
 \subsection{反向散射信号原理}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\linewidth]{chap02/absorb.pdf}
+    \caption{处于吸收状态的标签}
+    \label{fig:absorb}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\linewidth]{chap02/reflect.pdf}
+    \caption{处于反射状态的标签}
+    \label{fig:reflect}
+\end{figure}
+
+反向散射信号的基本原理是标签通过射频开关改变电路的接入阻抗，从而改变天线的反射系数来实现对信号的调制。
+如图~\ref{fig:absorb}~所示，当射频开关处于OFF状态时，接入阻抗为电路阻抗，标签处于吸收状态；如图~\ref{fig:reflect}~所示，当射频开关处于ON状态时，接入阻抗为0，标签处于反射状态。
+用数学公式表示的话，标签反射信号与入射信号间的关系为：
+\begin{equation}
+    S_{\text{out}} = \frac{Z_a-Z_c}{Z_a+Z_c} S_{\text{in}} = \sigma S_{\text{in}}
+\end{equation}
+
+其中，$S_{\text{in}}$和$S_{\text{out}}$分别是入射信号和反射信号，$Z_a$是天线阻抗，$Z_c$是接入阻抗，$\sigma$是天线的反射系数。
+
+如果射频开关切换频率比较低，那么标签将表现为以开关键控方式调制信号。
+如果射频开关切换频率比较高，那么标签将表现为以频移键控方式控调制信号。
+此时，相当于将开关频率$f_{\text{tag}}$的方波信号与入射信号相乘：
+\begin{equation}
+    S_{\text{out}}(t) = Square\left(A_{\text{tag}}, f_{\text{tag}}, t\right) \cdot S_{\text{in}}(t)
+\end{equation}
+
+其中，常常用方波信号的一次谐波来近似表示该方波信号：
+\begin{equation}
+    Square(A_{\text{tag}}, f_{\text{tag}}, t) \approx A_{\text{tag}}\cos\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)
+\end{equation}
+
+根据欧拉公式，该信号可以进一步分解为两个频率分别为$f_{\text{tag}}$和$-f_{\text{tag}}$的正弦波：
+\begin{equation}
+    A_{\text{tag}} \cos(2\pi f_{\text{tag}} t + \psi_{\text{tag}}) = \frac{A_{\text{tag}}}{2}\left(e^{j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)} + e^{-j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)}\right)
+\end{equation}
+
+于是，反射信号可以表示为：
+\begin{equation}
+    \begin{aligned}
+        S_{\text{out}}(t)
+         & \approx \frac{A_{\text{tag}}}{2}\left(e^{j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)} + e^{-j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)}\right) S_{\text{in}}(t)                         \\
+         & = \frac{A_{\text{tag}}}{2} e^{j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)} S_{\text{in}}(t) + \frac{A_{\text{tag}}}{2} e^{-j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)} S_{\text{in}}(t) \\
+         & = S_{\text{out}}^{\text{upper}}(t) + S_{\text{out}}^{\text{lower}}(t)
+    \end{aligned}
+\end{equation}
+
+这就是频移反向散射标签双边带信号的原理，注意到反射信号的双边带源自同一个方波调制信号，因此其相位特征呈现出对称性，在之后的章节中，将利用该性质解决标签频率漂移的问题。
+
 \subsection{正交性原理}
+
+在信号处理领域中，两个信号如果满足其内积为零，那么这两个信号被称为正交信号。
+定义两个信号的内积运算为共轭相乘的归一化积分：
+\begin{equation}
+    \langle f(t), g(t) \rangle = \frac{1}{T}\int_{0}^{T}f(t)\overline{g(t)}\ \mathrm{d}t
+\end{equation}
+
+对于频率不同的两个单频信号，它们的积分可以计算为：
+\begin{equation}
+    \begin{aligned}
+        \langle e^{j2\pi f_1 t}, e^{j2\pi f_2 t} \rangle
+         & = \frac{1}{T}\int_{0}^{T} e^{j2\pi f_1 t} e^{-j2\pi f_2 t} \mathrm{d}t \\
+         & = \frac{1}{T}\int_{0}^{T} e^{j2\pi (f_1 - f_2) t} \mathrm{d}t          \\
+         & = \frac{1}{T}\frac{e^{j2\pi (f_1 - f_2) T} - 1}{j2\pi (f_1 - f_2)}     \\
+    \end{aligned}
+\end{equation}
+
+考虑该积分的模长：
+\begin{equation}
+    \left|\langle e^{j2\pi f_1 t}, e^{j2\pi f_2 t} \rangle\right| = \left|\frac{\sin(\pi (f_1 - f_2) T)}{\pi (f_1 - f_2)T}\right|
+\end{equation}
+
+当$f_2 - f_1 = \frac{n}{T}, n \in \mathbb{Z} \setminus \{0\}$时，该积分的模长严格为0；当$|f_2 - f_1| T \gg 1$时，该积分的模长近似为0。
+由此可以得到，\textbf{持续时间为$T$、频率差距远大于$\frac{1}{T}$的两个单频信号彼此正交}。
+
+考虑接收端收到两个不同频率单频信号的情况，设两个单频信号分别为：
+\begin{equation}
+    s_1(t) = A_1 e^{j(2\pi f_1 t + \theta_1)}
+\end{equation}
+\begin{equation}
+    s_2(t) = A_2 e^{j(2\pi f_2 t + \theta_2)}
+\end{equation}
+
+那么此时接收端收到的信号为两个单频信号的叠加：
+\begin{equation}
+    r(t) = s_1(t) + s_2(t) = A_1 e^{j(2\pi f_1 t + \theta_1)} + A_2 e^{j(2\pi f_2 t + \theta_2)}
+\end{equation}
+
+若接收端想要从接收到的信号中提取出某一个单频信号的幅度和相位信息，可以通过将其与该单频信号相同频率的信号的内积运算来实现：
+\begin{equation}
+    \begin{aligned}
+        h_1 & = \langle r(t), e^{j2\pi f_1 t} \rangle
+        = \frac{1}{T}\int_{0}^{T} r(t) e^{-j2\pi f_1 t} \mathrm{d}t                                                          \\
+            & = \frac{1}{T}\int_{0}^{T} \left( A_1 e^{j\theta_1} + A_2 e^{j(2\pi(f_2 - f_1)t + \theta_2)}\right) \mathrm{d}t \\
+            & = A_1 e^{j\theta_1} + \frac{1}{T}A_2 e^{j\theta_2} \int_{0}^{T} e^{j2\pi(f_2 - f_1)t} \mathrm{d}t              \\
+            & \approx A_1 e^{j\theta_1}
+    \end{aligned}
+\end{equation}
+
+其中，最后一步近似成立的条件仍然是$|f_2 - f_1| \gg \frac{1}{T}$，也就是说，\textbf{持续时间为$T$、频率差距远大于$\frac{1}{T}$的两个单频信号可以在接收端被区分开来。}
+同样地，接收端提取信号$s_2(t)$的幅度和相位信息可以表示为：
+\begin{equation}
+    \begin{aligned}
+        h_2 & = \langle r(t), e^{j2\pi f_2 t} \rangle
+        = A_2 e^{j\theta_2}
+    \end{aligned}
+\end{equation}
+
+在实际的信号收发中，信号并非以连续函数的形式存在，而是以离散采样点的形式存在。
+设采样频率为$fs$，则实际发送的信号可以表示为：
+\begin{equation}
+    x[n] = A e^{j2\pi \frac{k}{N}n}
+\end{equation}
+
+其中，$N$是采样点数，$k = \frac{f_1}{fs}N$是归一化的频率。
+此时，内积运算定义为：
+\begin{equation}
+    \langle \vec{a}, \vec{b} \rangle = N\sum_{n=0}^{N-1}a_n\overline{b_n}
+\end{equation}
+
+类似地，可以得到两个不同频率单频信号的正交性结论，即当$|k_2 - k_1| \gg 1$时，两个单频信号彼此正交。
+
+如果理解为希尔伯特空间，则此空间的基向量可以写作：
+\begin{equation}
+    \vec{e}_k=\left(\frac{1}{N}e^{j2\pi\frac{k}{N}\cdot 0}, \frac{1}{N}e^{j2\pi\frac{k}{N}\cdot 1}, ..., \frac{1}{N}e^{j2\pi\frac{k}{N}\cdot (N-1)}\right),\ k = 0, 1, ..., N-1
+\end{equation}
+
+任意信号可以表示为：
+\begin{equation}
+    x[n] = \frac{1}{N}\sum_{k=0}^{N-1}c_ke^{j2\pi \frac{k}{N}n},\ n = 0, 1, ..., N-1
+\end{equation}
+
+于是，信号$x[n]$在基向量$\vec{e}_k$上的投影系数$c_k$可以表示为：
+\begin{equation}
+    \begin{aligned}
+        c_k & = \langle x[n], e^{j2\pi \frac{k}{N}n} \rangle
+        = N\sum_{n=0}^{N-1}x[n]e^{-j2\pi \frac{k}{N}n}       \\
+            & = \FFT[x[n]](k), \ k=0,1,...,N-1
+    \end{aligned}
+\end{equation}
+
+这也是离散傅里叶变换分离正交信号的原理。
+
+在本文提出的感知系统当中，利用了多种信号正交的性质，最终实现了远距离多目标运动特征感知系统。
+具体来说，本文利用了以下四种正交性质：
+
+（1）\textbf{不同参数的啁啾信号彼此正交：}在对啁啾信号解调时，不同参数的啁啾信号被转换成不同频率的单频信号，而这些单频信号彼此正交，可以被区分开来。这个性质使得一个接收端可以与多个发送端协作，而多个发送端之间互不干扰。
+
+（2）\textbf{反向散射信号与激励信号彼此正交：}反向散射信号过频移调制后，其频率远离了激励信号的频率，从而反向散射信号与激励信号彼此正交，可以被区分开来。这个性质使得反向散射信号可以在强直射信号的干扰下被有效提取出来，也使得利用激励信号进行无线同步成为可能。
+
+（3）\textbf{反向散射信号的双边带彼此正交：}反向散射信号的双边带拥有两个不同的频率，这两个频率远离彼此，从而反向散射信号的双边带彼此正交，可以被区分开来。这个性质使得反向散射信号的上下边带可以被分别提取出来，从而解决标签频率漂移的问题。
+
+（4）\textbf{不同频率的反向散射信号彼此正交：}不同感知目标使用不同频移频率的标签进行反向散射调制，从而不同感知目标的反射信号彼此正交，可以被区分开来。这个性质使得多个感知目标可以同时存在而互不干扰，从而实现多目标同时感知的功能。
 
 \subsection{信号与向量的对应关系}
 
