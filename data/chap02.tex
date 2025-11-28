@@ -239,7 +239,7 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
 
 \subsection{信号与相量的对应关系}
 
-在信号处理领域中，通常使用相量\footnote{正弦量的向量表示形式。}来表示数字信号，对于形如公式\eqref{eq:single-tone}~的单频信号，可以将其表示为一个相量：
+在信号处理领域中，通常使用相量\footnote{正弦量的向量表示形式。}来表示数字信号，对于形如公式~\eqref{eq:single-tone}~的单频信号，可以将其表示为一个相量：
 \begin{equation}
     H = A e^{j\theta}
 \end{equation}
@@ -257,7 +257,7 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
     \label{fig:vector2D}
 \end{figure}
 
-如图~\ref{fig:vector2D}所示，张等人的工作~\cite{zhang2021unlocking,zhang2020exploring}、谢等人的工作~\cite{xie2020combating}和江等人的工作~\cite{jiang2021sense}都采用了这种相量表示信号的方式，并且从中可以看出这些工作的局限性——由于接收端收到的信号是同频率信号的和，因此难以区分出不同的信号源，从而受限于单目标感知。
+如图~\ref{fig:vector2D}~所示，张等人的工作~\cite{zhang2021unlocking,zhang2020exploring}、谢等人的工作~\cite{xie2020combating}和江等人的工作~\cite{jiang2021sense}都采用了这种相量表示信号的方式，并且从中可以看出这些工作的局限性——由于接收端收到的信号是同频率信号的和，因此难以区分出不同的信号源，从而受限于单目标感知。
 
 \begin{figure}
     \centering
@@ -270,8 +270,171 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
 这也对应了上一小节中提到的不同频率信号的正交性原理，因为不同频率的信号代表了不同的相量平面，所以不同频率的信号可以被区分开来。
 如图~\ref{fig:vector3D}~所示，本文提出的系统正是利用了这一原理，从而使得接收端可以区分出不同感知目标的信号，进而实现多目标同时感知的功能。
 
-
 \section{信号传播建模}
+
+本节将介绍如何通过无线信号的特征（如幅度、相位等）变化来反映环境中目标的运动状态变化。
+这是本工作的理论基础，当装有频移反向散射标签的目标运动状态发生变化时，经由其反射的信号的特征也会发生变化，因此可以通过分析信号特征的变化来推断目标的运动状态变化。
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{chap02/propagation1.pdf}
+    \caption{信号传播场景}
+    \label{fig:propagation1}
+\end{figure}
+
+如图~\ref{fig:propagation1}~所示，不失一般性，先考虑最简单的信号传播场景，即只有一个发送端、一个接收端和一个频移反向散射标签的场景。
+设光速为$c$，发送端到接收端的距离为$d$，对应信号传播时间为$\tau = \frac{d}{c}$；发送端到标签的距离为$d_1$，对应信号传播时间为$\tau_1 = \frac{d_1}{c}$；标签到接收端的距离为$d_2$，对应信号传播时间为$\tau_2 = \frac{d_2}{c}$。
+设发送端与接收端的采样频率为$fs$，载波频率为$f_c$，发送端发送的基带啁啾信号为$s_0(t)=s(t)$。
+
+\subsection{激励信号传播模型}
+
+激励信号是指发送端发送、接收端直接接收的信号。
+发送端实际发送的信号为基带信号的上变频形式：
+\begin{equation}
+    s_1(t) = s_0(t) \cdot e^{j 2\pi f_c t} \cdot e^{j \varphi_{\text{TX}}}
+\end{equation}
+
+其中，$\varphi_{\text{TX}}$是发送端载波的初相位。
+经过时间$\tau$后，接收端收到发送端发送的信号，并下变频，得到：
+\begin{equation}
+    \begin{aligned}
+        s_2(t) & = \alpha(\tau) \cdot s_1\left(t - \tau\right) \cdot e^{-j 2\pi f_c t} \cdot e^{-j \varphi_{\text{RX}}}                                      \\
+               & = \alpha(\tau) \cdot s_0\left(t - \tau\right) \cdot e^{-j 2\pi f_c \tau} \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)}
+    \end{aligned}
+\end{equation}
+
+其中，$\varphi_{\text{RX}}$是接收端载波的初相位，$\alpha(\tau)$是信号的路径损耗，随着传播距离的增加而减小。
+接收端在接收到信号后，将对其进行时间窗口对齐，得到：
+\begin{equation}
+    \begin{aligned}
+        s_3(t) & = s_2(t + t_\text{start})                                                                                                                                    \\
+               & = \alpha(\tau) \cdot s_0\left(t + t_\text{start} - \tau\right) \cdot e^{-j 2\pi f_c \tau} \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)}
+    \end{aligned}
+\end{equation}
+
+其中，$t_\text{start}$是接收端对齐的窗口起点位置，理想情况下，$t_\text{start} = \tau$。
+最后，接收端对信号进行解调，得到激励信号：
+\begin{equation}
+    \begin{aligned}
+        r_E(t) & = s_3(t) \cdot s_{\text{down}}(t)                                                                                                                              \\
+        %    & = \alpha(\tau) \cdot e^{j 2\pi \left(f_0 + \frac{BW}{2}\right)t} \cdot e^{-j 2\pi f_c \tau} \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \\
+        %    & \cdot e^{j2\pi \left(f_0 (t_\text{start} - \tau) + \frac{1}{2}k\left(2t + t_\text{start} - \tau\right)\left(t_\text{start} - \tau\right)\right)}
+               & = \alpha(\tau) \cdot e^{j 2\pi \left(f_0 + \frac{BW}{2}\right)t} \cdot e^{-j 2\pi f_c \tau} \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)}
+    \end{aligned}
+\end{equation}
+
+\subsection{反向散射信号传播模型}
+
+如图~\ref{fig:propagation1}~所示，接收端收到的信号除了包含激励信号外，还包含有来自标签的反射信号。
+发送端的信号经过时间$\tau_1$后到达标签，可以表示为：
+\begin{equation}
+    s_4(t) = \alpha_1(\tau_1) \cdot s_1\left(t - \tau_1\right)
+\end{equation}
+
+如前所述，标签生成方波调制入射信号，得到双边带反射信号：
+\begin{equation}
+    \begin{aligned}
+        s_5(t) & = s_4(t) \cdot A_{\text{tag}} \cos(2\pi f_{\text{tag}} t + \psi_{\text{tag}}) \\
+        %    & = \alpha_1(\tau_1) \cdot s_0\left(t - \tau_1\right) \cdot e^{j 2\pi f_c \left(t - \tau_1\right)} \cdot e^{j\varphi_{\text{TX}}}                 \\
+               & = s_5^\text{upper}(t) + s_5^\text{lower}(t)
+    \end{aligned}
+\end{equation}
+
+其中：
+\begin{equation}
+    s_5^\text{upper}(t) = \alpha'_1(\tau_1) \cdot s_0\left(t - \tau_1\right) \cdot e^{j 2\pi f_c \left(t - \tau_1\right)} \cdot e^{j\varphi_{\text{TX}}} \cdot e^{j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)}
+\end{equation}
+\begin{equation}
+    s_5^\text{lower}(t) = \alpha'_1(\tau_1) \cdot s_0\left(t - \tau_1\right) \cdot e^{j 2\pi f_c \left(t - \tau_1\right)} \cdot e^{j\varphi_{\text{TX}}} \cdot e^{-j\left(2\pi f_{\text{tag}} t + \psi_{\text{tag}}\right)}
+\end{equation}
+
+反射信号再经过时间$\tau_2$后到达接收端，接收端下变频得到：
+\begin{equation}
+    \begin{aligned}
+        s_6^{\text{upper}}(t) & = \alpha_2(\tau_2) \cdot s_5^{\text{upper}}\left(t - \tau_2\right) \cdot e^{-j 2\pi f_c t} \cdot e^{-j \varphi_{\text{RX}}}                                       \\
+                              & = \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot s_0\left(t - \tau_1 - \tau_2\right) \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)}                           \\
+                              & \quad \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)}  \cdot e^{j\left(2\pi f_{\text{tag}} \left(t - \tau_2\right) + \psi_{\text{tag}}\right)}
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        s_6^{\text{down}}(t) & = \alpha_2(\tau_2) \cdot s_5^{\text{down}}\left(t - \tau_2\right) \cdot e^{-j 2\pi f_c t} \cdot e^{-j \varphi_{\text{RX}}}                                         \\
+                             & = \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot s_0\left(t - \tau_1 - \tau_2\right) \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)}                            \\
+                             & \quad \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)}  \cdot e^{-j\left(2\pi f_{\text{tag}} \left(t - \tau_2\right) + \psi_{\text{tag}}\right)}
+    \end{aligned}
+\end{equation}
+
+由于捕获效应，接收端会根据激励信号的到达时间来对齐时间窗口，并进行解调，得到：
+\begin{equation}
+    \begin{aligned}
+        r_B^\text{upper}(t) & = s_6^{\text{upper}}\left(t + t_{\text{start}}\right) \cdot s_{\text{down}}(t)                                                                                         \\
+                            & \approx \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot e^{j 2\pi \left(f_0 + \frac{BW}{2} + f_{\text{tag}}\right)t} \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)} \\
+                            & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{j\left(2\pi f_{\text{tag}} \left(\tau - \tau_2\right) + \psi_{\text{tag}}\right)}
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        r_B^\text{lower}(t) & = s_6^{\text{lower}}\left(t + t_{\text{start}}\right) \cdot s_{\text{down}}(t)                                                                                         \\
+                            & \approx \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot e^{j 2\pi \left(f_0 + \frac{BW}{2} - f_{\text{tag}}\right)t} \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)} \\
+                            & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{-j\left(2\pi f_{\text{tag}} \left(\tau - \tau_2\right) + \psi_{\text{tag}}\right)}
+    \end{aligned}
+\end{equation}
+
+这里用约等号的原因是$\tau \neq \tau_1 + \tau_2$，但是由于基带频率很低，$\tau_1$和$\tau_2$的变化很小，因此这个时间误差对基带相位的影响可以忽略不计。
+
+\subsection{信号特征提取}\label{sec:signal_feature_extraction}
+
+综上所述，接收端收到的信号为：
+\begin{equation}
+    r(t) = r_E(t) + r_B^\text{upper}(t) + r_B^\text{lower}(t)
+\end{equation}
+
+这三个信号的频率分别为$f_0 + \frac{BW}{2}$、$f_0 + \frac{BW}{2} + f_{\text{tag}}$和$f_0 + \frac{BW}{2} - f_{\text{tag}}$，相互之间频率差距远大于$\frac{1}{T}$，因此彼此正交，可以被区分开来。
+通过傅里叶变换，可以得到信号幅度与相位，或者写成相量的形式：
+\begin{equation}
+    \begin{aligned}
+        H_E & = \FFT[r(t)]\left(f_0 + \frac{BW}{2}\right)                                                                  \\
+            & = \alpha(\tau) \cdot e^{-j 2\pi f_c \tau} \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)}
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        H_B^\text{upper} & = \FFT[r(t)]\left(f_0 + \frac{BW}{2} + f_{\text{tag}}\right)                                                                                                       \\
+                         & = \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)}                                                                      \\
+                         & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{j\left(2\pi f_{\text{tag}} \left(\tau - \tau_2\right) + \psi_{\text{tag}}\right)}
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        H_B^\text{lower} & = \FFT[r(t)]\left(f_0 + \frac{BW}{2} - f_{\text{tag}}\right)                                                                                                        \\
+                         & = \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)}                                                                       \\
+                         & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{-j\left(2\pi f_{\text{tag}} \left(\tau - \tau_2\right) + \psi_{\text{tag}}\right)}
+    \end{aligned}
+\end{equation}
+
+这些相量的幅度和相位信息中包含了感知目标的运动信息（例如相位中的$\tau_1 + \tau_2$），通过分析这些信号特征的变化，就可以得到目标物体的运动距离和运动频率。
+在多目标感知的场景中，不同的感知目标会装备不同频移的反向散射标签，并且满足$\left|f_{\text{tag}_i} - f_{\text{tag}_j} \gg \frac{1}{T}\right|$正交性条件，于是，不同目标的反向散射信号也可以被区分开来：
+\begin{equation}
+    r(t) = r_E(t) + \sum_{i} \left( r_{B_i}^\text{upper}(t) + r_{B_i}^\text{lower}(t) \right)
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        H_{B_i}^\text{upper} & = \FFT[r(t)]\left(f_0 + \frac{BW}{2} + f_{\text{tag}_i}\right)                                                                                                             \\
+                             & = \alpha'_1(\tau_{1_i}) \cdot \alpha_2(\tau_{2_i}) \cdot e^{-j 2\pi f_c \left(\tau_{1_i} + \tau_{2_i}\right)}                                                              \\
+                             & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{j\left(2\pi f_{\text{tag}_i} \left(\tau - \tau_{2_i}\right) + \psi_{\text{tag}_i}\right)}
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        H_{B_i}^\text{lower} & = \FFT[r(t)]\left(f_0 + \frac{BW}{2} - f_{\text{tag}_i}\right)                                                                                                              \\
+                             & = \alpha'_1(\tau_{1_i}) \cdot \alpha_2(\tau_{2_i}) \cdot e^{-j 2\pi f_c \left(\tau_{1_i} + \tau_{2_i}\right)}                                                               \\
+                             & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{-j\left(2\pi f_{\text{tag}_i} \left(\tau - \tau_{2_i}\right) + \psi_{\text{tag}_i}\right)}
+    \end{aligned}
+\end{equation}
+
+至此，本文完成了信号传播模型的建立，通过正交的激励信号和反射信号，成功提取出多个目标的反射信号特征。
+值得注意的是，虽然本文在建模过程中假设了基带信号是啁啾信号，但实际上任何基带信号都可以使用本文的模型进行描述，只要该信号可以解调成单频信号。
+在后续的章节中，本文将详细展开该理论模型应用于实际系统时面对的挑战，并提出相应的解决方案。
 
 \section{面向频移反向散射标签的感知模型}
 
