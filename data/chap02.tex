@@ -19,7 +19,7 @@
     \label{eq:single-tone}
 \end{equation}
 
-\subsection{啁啾信号原理}
+\subsection{啁啾信号原理} \label{sec:chirp}
 
 LoRa广域网技术中使用啁啾信号作为基带信号来提高信号的抗干扰能力与传播距离。
 啁啾信号采用线性调频（Chirp Spreading Spectrum, CSS）的方式来编码信息，每一个符号的频率随时间线性变化。
@@ -180,6 +180,7 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
             & = A_1 e^{j\theta_1} + \frac{1}{T}A_2 e^{j\theta_2} \int_{0}^{T} e^{j2\pi(f_2 - f_1)t} \mathrm{d}t              \\
             & \approx A_1 e^{j\theta_1}
     \end{aligned}
+    \label{eq:orthogonal_extract}
 \end{equation}
 
 其中，最后一步近似成立的条件仍然是$|f_2 - f_1| \gg \frac{1}{T}$，也就是说，\textbf{持续时间为$T$、频率差距远大于$\frac{1}{T}$的两个单频信号可以在接收端被区分开来。}
@@ -396,6 +397,7 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
         H_E & = \FFT[r(t)]\left(f_0 + \frac{BW}{2}\right)                                                                  \\
             & = \alpha(\tau) \cdot e^{-j 2\pi f_c \tau} \cdot e^{j \left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)}
     \end{aligned}
+    \label{eq:H_E}
 \end{equation}
 \begin{equation}
     \begin{aligned}
@@ -403,6 +405,7 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
                          & = \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)}                                                                      \\
                          & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{j\left(2\pi f_{\text{tag}} \left(\tau - \tau_2\right) + \psi_{\text{tag}}\right)}
     \end{aligned}
+    \label{eq:H_B_upper}
 \end{equation}
 \begin{equation}
     \begin{aligned}
@@ -410,6 +413,7 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
                          & = \alpha'_1(\tau_1) \cdot \alpha_2(\tau_2) \cdot e^{-j 2\pi f_c \left(\tau_1 + \tau_2\right)}                                                                       \\
                          & \quad \cdot e^{j\left(\varphi_{\text{TX}} - \varphi_{\text{RX}}\right)} \cdot e^{-j\left(2\pi f_{\text{tag}} \left(\tau - \tau_2\right) + \psi_{\text{tag}}\right)}
     \end{aligned}
+    \label{eq:H_B_lower}
 \end{equation}
 
 这些相量的幅度和相位信息中包含了感知目标的运动信息（例如相位中的$\tau_1 + \tau_2$），通过分析这些信号特征的变化，就可以得到目标物体的运动距离和运动频率。
@@ -491,5 +495,3 @@ LoRa使用一个参数来控制啁啾符号的形状和初始频率，称为扩�
 随后，本章建立了信号传播模型，描述了如何通过分析信号特征的变化来反映目标的运动状态变化。
 最后，本章进一步完善了信号传播模型，建立了面向频移反向散射标签的感知模型，并说明本文系统如何通过频移反向散射标签区分静态信号和动态信号，从而实现多目标同时感知。
 为了在实际系统中应用上述理论模型，需要解决一系列挑战，下一章节中将展开介绍这些挑战，并给出相应的解决方案。
-
-

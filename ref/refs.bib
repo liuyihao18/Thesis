@@ -586,3 +586,21 @@
   year      = {1984},
   publisher = {Elsevier}
 }
+
+@inproceedings{du2024loratrimmer,
+  author    = {Du, Jialuo and Liu, Yunhao and Ren, Yidong and Liu, Li and Cao, Zhichao},
+  title     = {LoRaTrimmer: Optimal Energy Condensation with Chirp Trimming for LoRa Weak Signal Decoding},
+  year      = {2024},
+  isbn      = {9798400704895},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3636534.3690681},
+  doi       = {10.1145/3636534.3690681},
+  abstract  = {LoRa has been widely used for the Internet of Things (IoT) due to its low power consumption and long communication range. The standard LoRa demodulation process condenses the energy of LoRa chirps to combat noise. However, there is an intrinsic frequency jump in real-life LoRa signals that standard demodulation neglects, reducing communication range in practice. We thoroughly study the frequency jump phenomenon and observe that it affects LoRa demodulation mainly in two folds: First, it makes each section of the signal shorter than the standard FFT perception range, introducing additional noise; Second, it induces a random phase jump that causes destructive addition of signal power. To mitigate the influence of frequency jump on LoRa demodulation, we propose LoRaTrimmer, a novel, fast, and noise-resilient LoRa decoding algorithm that optimally condenses LoRa signal power. LoRaTrimmer contains two innovative designs: First, we trim the perception range of FFT at the frequency jump, trimming off the additional noise; Second, we bypass the phase jump induced by frequency jump by probabilistic modeling and add up signal power constructively. Furthermore, we performed theoretical analysis to guarantee the performance of our method. Thorough experiments in various real-life environments show 1.70 to 2.49 dB SNR gain over the state-of-the-art and 3.44 to 3.79 dB SNR gain over FFT-based methods, translating to at most 1.67 times gain of coverage area. LoRaTrimmer is also robust under complex noise patterns, and capable of real-time decoding, with the only overhead being a slight increase in computational cost (0.51 to 3.17 ms per packet, compared with 0.23 to 0.94 ms of baseline methods).},
+  booktitle = {Proceedings of the 30th Annual International Conference on Mobile Computing and Networking},
+  pages     = {1104–1118},
+  numpages  = {15},
+  keywords  = {internet-of-things, low-power wide area networks, LoRa},
+  location  = {Washington D.C., DC, USA},
+  series    = {ACM MobiCom '24}
+}
