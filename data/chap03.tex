@@ -165,8 +165,102 @@
 这种改进使得窗函数在保持主瓣宽度不至于过度增加的情况下，使最大旁瓣高度可再降低约2至4.5dB。
 改进汉明窗的时域权重和频域响应曲线如图~\ref{fig:window}~所示，相较于标准傅里叶变换（也就是矩形窗），旁瓣高度大幅降低。
 
-
 \section{相位偏移消除方法}
+
+硬件不完善导致的信号特征误差是感知系统中常见的问题，尤其是相位偏移，将完全阻碍感知应用。
+在本文中，相位偏移主要来源于收发端不同步和标签频率漂移两种情况，本节将分别介绍针对这两种情况的相位偏移消除方法。
+
+\subsection{收发端不同步的相位校正}
+
+收发端不同步指的是发送端和接收端之间的时钟不同步，即发送端和接收端使用的是不同的参考时钟源。
+于是，它们之间的相位偏移主要由以下三个因素导致：
+
+\subsubsection{由CFO引起的偏移}
+当发送端（TX）和接收端（RX）不同步时，它们生成的载波频率会有所不同，导致收发端载波相位之间出现差异。
+假设载波频率偏移（CFO）在时间上保持恒定\footnote{即使CFO随时间变化，本文提出的方法仍然适用。}，那么相位偏移可表示为：
+\begin{equation}
+    \varphi_{\text{CFO}} = \varphi_{\text{TX}} - \varphi_{\text{RX}} =  2 \pi f_{\text{CFO}} t
+\end{equation}
+
+\subsubsection{由STO引起的偏移}
+由于接收端采样频率$fs$是有限的，因此接收端在接收信号时无法精确采样到啁啾信号的起始时间，导致窗口对齐时 $t_{\text{start}} \neq \tau$。
+设时间偏移为 $t_{\text{STO}} = t_{\text{start}} - \tau, t_\text{STO} \in \left[-\frac{1}{2f_s}, \frac{1}{2f_s}\right)$，它将对每个啁啾信号在起始点产生相位偏移：
+\begin{equation}
+    \begin{aligned}
+        \left. \varphi_{\text{STO}} \right|_{t = nT}
+         & = s\left(nT + t_{\text{STO}}\right) - s(nT)       \\
+         & = 2\pi f_0t_{\text{STO}} + \pi k t_{\text{STO}}^2
+    \end{aligned}
+    \label{eq:varphi_STO}
+\end{equation}
+
+其中，$s$是发送端发送的啁啾信号。
+由于本文通过傅里叶变换来汇聚每个啁啾信号的能量，因此仅需关注每个啁啾信号起始点的相位偏移。
+
+\subsubsection{由SFO引起的偏移}
+当收发端不同步时，还会发生采样频率偏移（SFO），导致接收信号的时间乘以一个缩放因子$m$，其导致的相位偏移为：
+\begin{equation}
+    \begin{aligned}
+        \varphi_{\text{SFO}}
+         & = s(mt) - s(t)                                      \\
+         & = 2\pi\left(f_0(m-1)t + \frac{1}{2}k(m-1)t^2\right)
+    \end{aligned}
+\end{equation}
+
+\subsubsection{三种偏移对激励信号和反向散射信号的影响}
+CFO、STO和SFO对激励信号和反向散射信号的综合影响可以表示为：
+\begin{equation}
+    \begin{aligned}
+        \varphi_{E}
+         & = 2 \pi f_{\text{CFO}} m(t + t_{\text{STO}})                  \\
+         & \quad + s\left(m\left(t + t_{\text{STO}}\right)\right) - s(t)
+    \end{aligned}
+    \label{eq:varphi_E}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \varphi_{B}
+         & = 2 \pi f_{\text{CFO}} m(t + t_{\text{STO}} + \tau_{\Delta})                  \\
+         & \quad + s\left(m\left(t + t_{\text{STO}} + \tau_{\Delta}\right)\right) - s(t)
+    \end{aligned}
+    \label{eq:varphi_B}
+\end{equation}
+
+其中，$\tau_{\Delta} = \tau - \tau_1 - \tau_2$。
+在实际情况中，接收端收取的激励信号和反向散射双边带信号分别为$\hat{H}_E = H_E \cdot e^{j\varphi_E}$、$\hat{H}^\text{upper}_B = H^\text{upper}_B \cdot e^{j\varphi_B}$和$\hat{H}^\text{lower}_B = H^\text{lower}_B \cdot e^{j\varphi_B}$。
+考虑$\varphi_E$和$\varphi_B$的差值：
+\begin{equation}
+    \begin{aligned}
+        \left. \varphi_{B} - \varphi_{E} \right|_{t = nT}
+         & = 2 \pi (f_0 + f_{\text{CFO}}) m \tau_{\Delta}                 \\
+         & \quad + \pi km^2\tau_{\Delta}(2t_{\text{STO}} + \tau_{\Delta}) \\
+         & \approx 0
+    \end{aligned}
+\end{equation}
+
+在上式中，$f_{\text{CFO}}$和$f_0$仅为几百kHz量级，$\tau_\Delta$仅为纳秒级，而这些项的变化量甚至更小，使得该差值的变化量近似为0。
+为简便起见，在本文的分析中直接将该差值记作0。
+于是，通过将反向散射信号除以激励信号，系统有效地校正了由发送端和接收端之间不同步引入的相位偏移。
+
+相除之后的信号表示为：
+\begin{equation}
+    \begin{aligned}
+        \frac{\hat{H}^\text{upper}_B}{\hat{H}_E} & = \frac{H^\text{upper}_B}{H_E} \cdot e^{j(\varphi_B - \varphi_E)}                                   \approx \frac{H^\text{upper}_B}{H_E} \\
+                                                 & = \frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)} \cdot e^{j2\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)}        \\
+                                                 & \quad \cdot e^{j2\pi f_{\text{tag}} \left(\tau - \tau_2\right)} \cdot e^{j\psi_{\text{tag}}}                                             \\
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \frac{\hat{H}^\text{lower}_B}{\hat{H}_E} & = \frac{H^\text{lower}_B}{H_E} \cdot e^{j(\varphi_B - \varphi_E)} \approx \frac{H^\text{lower}_B}{H_E}                            \\
+                                                 & = \frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)} \cdot e^{j2\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)} \\
+                                                 & \quad \cdot e^{-j2\pi f_{\text{tag}} \left(\tau - \tau_2\right)} \cdot e^{-j\psi_{\text{tag}}}                                    \\
+    \end{aligned}
+\end{equation}
+
+\subsection{标签频率漂移的误差消除}
+
+
 
 \section{感知信息提取方法}
 
