@@ -179,7 +179,7 @@
 当发送端（TX）和接收端（RX）不同步时，它们生成的载波频率会有所不同，导致收发端载波相位之间出现差异。
 假设载波频率偏移（CFO）在时间上保持恒定\footnote{即使CFO随时间变化，本文提出的方法仍然适用。}，那么相位偏移可表示为：
 \begin{equation}
-    \varphi_{\text{CFO}} = \varphi_{\text{TX}} - \varphi_{\text{RX}} =  2 \pi f_{\text{CFO}} t
+    \varepsilon_{\text{CFO}} = \varphi_{\text{TX}} - \varphi_{\text{RX}} =  2 \pi f_{\text{CFO}} t
 \end{equation}
 
 \subsubsection{由STO引起的偏移}
@@ -187,7 +187,7 @@
 设时间偏移为 $t_{\text{STO}} = t_{\text{start}} - \tau, t_\text{STO} \in \left[-\frac{1}{2f_s}, \frac{1}{2f_s}\right)$，它将对每个啁啾信号在起始点产生相位偏移：
 \begin{equation}
     \begin{aligned}
-        \left. \varphi_{\text{STO}} \right|_{t = nT}
+        \left. \varepsilon_{\text{STO}} \right|_{t = nT}
          & = s\left(nT + t_{\text{STO}}\right) - s(nT)       \\
          & = 2\pi f_0t_{\text{STO}} + \pi k t_{\text{STO}}^2
     \end{aligned}
@@ -201,7 +201,7 @@
 当收发端不同步时，还会发生采样频率偏移（SFO），导致接收信号的时间乘以一个缩放因子$m$，其导致的相位偏移为：
 \begin{equation}
     \begin{aligned}
-        \varphi_{\text{SFO}}
+        \varepsilon_{\text{SFO}}
          & = s(mt) - s(t)                                      \\
          & = 2\pi\left(f_0(m-1)t + \frac{1}{2}k(m-1)t^2\right)
     \end{aligned}
@@ -211,7 +211,7 @@
 CFO、STO和SFO对激励信号和反向散射信号的综合影响可以表示为：
 \begin{equation}
     \begin{aligned}
-        \varphi_{E}
+        \varepsilon_{E}
          & = 2 \pi f_{\text{CFO}} m(t + t_{\text{STO}})                  \\
          & \quad + s\left(m\left(t + t_{\text{STO}}\right)\right) - s(t)
     \end{aligned}
@@ -219,7 +219,7 @@ CFO、STO和SFO对激励信号和反向散射信号的综合影响可以表示�
 \end{equation}
 \begin{equation}
     \begin{aligned}
-        \varphi_{B}
+        \varepsilon_{B}
          & = 2 \pi f_{\text{CFO}} m(t + t_{\text{STO}} + \tau_{\Delta})                  \\
          & \quad + s\left(m\left(t + t_{\text{STO}} + \tau_{\Delta}\right)\right) - s(t)
     \end{aligned}
@@ -227,11 +227,11 @@ CFO、STO和SFO对激励信号和反向散射信号的综合影响可以表示�
 \end{equation}
 
 其中，$\tau_{\Delta} = \tau - \tau_1 - \tau_2$。
-在实际情况中，接收端收取的激励信号和反向散射双边带信号分别为$\hat{H}_E = H_E \cdot e^{j\varphi_E}$、$\hat{H}^\text{upper}_B = H^\text{upper}_B \cdot e^{j\varphi_B}$和$\hat{H}^\text{lower}_B = H^\text{lower}_B \cdot e^{j\varphi_B}$。
-考虑$\varphi_E$和$\varphi_B$的差值：
+在实际情况中，接收端收取的激励信号和反向散射双边带信号分别为$\hat{H}_E = H_E \cdot e^{j\varepsilon_E}$、$\hat{H}^\text{upper}_B = H^\text{upper}_B \cdot e^{j\varepsilon_B}$和$\hat{H}^\text{lower}_B = H^\text{lower}_B \cdot e^{j\varepsilon_B}$。
+考虑$\varepsilon_E$和$\varepsilon_B$的差值：
 \begin{equation}
     \begin{aligned}
-        \left. \varphi_{B} - \varphi_{E} \right|_{t = nT}
+        \left. \varepsilon_{B} - \varepsilon_{E} \right|_{t = nT}
          & = 2 \pi (f_0 + f_{\text{CFO}}) m \tau_{\Delta}                 \\
          & \quad + \pi km^2\tau_{\Delta}(2t_{\text{STO}} + \tau_{\Delta}) \\
          & \approx 0
@@ -242,25 +242,82 @@ CFO、STO和SFO对激励信号和反向散射信号的综合影响可以表示�
 为简便起见，在本文的分析中直接将该差值记作0。
 于是，通过将反向散射信号除以激励信号，系统有效地校正了由发送端和接收端之间不同步引入的相位偏移。
 
-相除之后的信号表示为：
+相除之后的信号可以表示为：
 \begin{equation}
     \begin{aligned}
-        \frac{\hat{H}^\text{upper}_B}{\hat{H}_E} & = \frac{H^\text{upper}_B}{H_E} \cdot e^{j(\varphi_B - \varphi_E)}                                   \approx \frac{H^\text{upper}_B}{H_E} \\
-                                                 & = \frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)} \cdot e^{j2\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)}        \\
-                                                 & \quad \cdot e^{j2\pi f_{\text{tag}} \left(\tau - \tau_2\right)} \cdot e^{j\psi_{\text{tag}}}                                             \\
+        H_\text{div}^\text{upper} & = \frac{\hat{H}^\text{upper}_B}{\hat{H}_E} = \frac{H^\text{upper}_B}{H_E} \cdot e^{j(\varepsilon_B - \varepsilon_E)}                                                   \\
+                                  & \approx \frac{H^\text{upper}_B}{H_E} = \frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)} \cdot e^{j2\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)} \\
+                                  & \quad \quad \quad \quad \quad \cdot e^{j2\pi f_{\text{tag}} \left(\tau - \tau_2\right)} \cdot e^{j\psi_{\text{tag}}}                                                   \\
     \end{aligned}
 \end{equation}
 \begin{equation}
     \begin{aligned}
-        \frac{\hat{H}^\text{lower}_B}{\hat{H}_E} & = \frac{H^\text{lower}_B}{H_E} \cdot e^{j(\varphi_B - \varphi_E)} \approx \frac{H^\text{lower}_B}{H_E}                            \\
-                                                 & = \frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)} \cdot e^{j2\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)} \\
-                                                 & \quad \cdot e^{-j2\pi f_{\text{tag}} \left(\tau - \tau_2\right)} \cdot e^{-j\psi_{\text{tag}}}                                    \\
+        H_\text{div}^\text{lower} & = \frac{\hat{H}^\text{lower}_B}{\hat{H}_E} = \frac{H^\text{lower}_B}{H_E} \cdot e^{j(\varepsilon_B - \varepsilon_E)}                                                   \\
+                                  & \approx \frac{H^\text{lower}_B}{H_E} = \frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)} \cdot e^{j2\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)} \\
+                                  & \quad \quad \quad \quad \quad \cdot e^{-j2\pi f_{\text{tag}} \left(\tau - \tau_2\right)} \cdot e^{-j\psi_{\text{tag}}}                                                 \\
     \end{aligned}
+\end{equation}
+
+这个操作的关键在于激励信号和反向散射信号均由相同的收发端进行发送和接受，因此CFO、STO和SFO造成的偏移几乎是相同的，从而在相除时得以消除。
+当有多个标签同时工作时，该方法仍然适用，只需分别将每个标签的反向散射信号与激励信号相除即可：
+\begin{equation}
+    H_{\text{div}_i}^\text{upper} = \frac{\hat{H}^\text{upper}_{B_i}}{\hat{H}_E},\quad H_{\text{div}_i}^\text{lower} = \frac{\hat{H}^\text{lower}_{B_i}}{\hat{H}_E}
 \end{equation}
 
 \subsection{标签频率漂移的误差消除}
 
+标签频率漂移指的是由于标签的频率偏移$f_{\text{tag}}$不稳定，导致反射信号的相位出现漂移。
+这种漂移在低成本标签中尤为明显，因为其晶振精度较低，且容易受到温度、湿度等环境因素的影响。
+考虑$H_{\text{div}}^\text{upper}$和$H_{\text{div}}^\text{lower}$中与标签频率$f_{\text{tag}}$相关的相位项：
+\begin{equation}
+    \varepsilon_{\text{tag}}^\text{upper} = 2\pi f_{\text{tag}} \left(\tau - \tau_2\right) + \psi_{\text{tag}}
+\end{equation}
+\begin{equation}
+    \varepsilon_{\text{tag}}^\text{lower} = -2\pi f_{\text{tag}} \left(\tau - \tau_2\right) - \psi_{\text{tag}}
+\end{equation}
 
+虽然第一项由于$f_\text{tag}$通常只有几十kHz量级，而$\tau - \tau_2$只有纳秒级，使得其可忽略不计，但是第二项$\psi_{\text{tag}}$\footnote{$\Delta \psi_{\text{tag}} \approx 2 \pi \Delta f_\text{tag} \Delta t$可以作为一个量级意义上的估计。}会引入显著的相位偏移，影响感知精度。
+为了解决这个问题，本文提出了一种利用反向散射信号双边带的特性进行误差消除的方法。
+在~\ref{sec:backscatter}~节中，已经介绍了反向散射标签通过调制激励信号来生成双边带信号的原理，如图~\ref{fig:backscatter}~所示，标签生成一个频率为 $f$ 的方波，该方波可以在复数域中分解为两个频率分别为 $f$ 和 $-f$ 的正弦波。
+于是标签频率$f_\text{tag}$的漂移会同时影响到双边带信号的相位，但是影响方向相反。
+也就是说，有：
+\begin{equation}
+    \varepsilon_{\text{tag}}^\text{upper} + \varepsilon_{\text{tag}}^\text{lower} = 0
+\end{equation}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.95\linewidth]{chap03/backscatter.pdf}
+    \caption{反向散射标签调制原理}
+    \label{fig:backscatter}
+\end{figure}
+
+因此，通过将双边带信号结合起来，便可以有效地消除标签频率漂移引起的相位误差：
+\begin{equation}
+    H^2_\text{div} = H_\text{div}^\text{upper} \cdot H_\text{div}^\text{lower} \approx \left(\frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)}\right)^2 \cdot e^{j4\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)}
+\end{equation}
+
+最后一步是对该信号进行平方根运算，从而得到最终的无偏信号：
+\begin{equation}
+    H_\text{final} = \sqrt{H^2_\text{div}} \approx \frac{\alpha_1'(\tau_1)\cdot\alpha_2(\tau_2)}{\alpha(\tau)} \cdot e^{j2\pi f_c\left(\tau - \left(\tau_1 + \tau_2\right)\right)}
+\end{equation}
+
+在开平方的时候，需要注意相位的歧义性问题，即开平方的结果可能是相位$\theta$或者$\theta + \pi$。
+为了解决这个问题，可以通过相位连续性的约束来选择合适的解，即假设相邻时间窗口内相位的变化较小，从而选择相位变化最小的解。
+如图~\ref{fig:ambiguity}~所示，假设已经计算出$H(t_i)$，然后需要计算$H(t_{i+1})$，就选择与$H(t_i)$更接近的平方根结果作为 $H(t_{i+1})$。
+这个方法在实际应用中效果良好，因为目标物体的运动通常是连续且较低速的，从而保证了相位的连续性。
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\linewidth]{chap03/ambiguity.pdf}
+    \caption{基于相位连续性的消除歧义方法}
+    \label{fig:ambiguity}
+\end{figure}
+
+\subsubsection{傅里叶变换引入的固定偏移}
+
+当标签的频率发生严重漂移时，反向散射信号在傅里叶变换后的频点也可能出现移动，这会导致固定的相位偏移。
+假设时刻$t_1$的信号频率为$f_1$，时刻$t_2$的信号频率为$f_2$，且两者之间的时间间隔为$\Delta t = t_2 - t_1$，则该相位偏移为$\pi(f_2 - f_1)\Delta t$。
 
 \section{感知信息提取方法}
 
