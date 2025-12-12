@@ -4,11 +4,33 @@
 
 \section{系统架构设计}
 
+本文提出的基于频移反向散射标签的远距离多目标运动特征感知系统原型主要包含发送端、接收端以及频移标签三个硬件部分，以及算法模块和用户界面两个软件部分，其中算法模块与信号处理章节相互对应，接下来将依次展开介绍。
+
 \section{发送端设计}
+信号发送模块硬件部分使用商用Semtech SX1276 LoRa无线模块~\cite{semtech2023sx1276}或者USRP N210~\cite{etuss2023usrp}与HackRF~\cite{great2023hackrf}软件无线电设备，软件部分使用STM32 Cube IDE或者GNU Radio搭建。
+Semtech SX1276 LoRa无线模块通过STM32单片机控制，上位机烧写STM32控制信号的发送；而USRP N210通过网络电缆、HackRF One通过USB与上位机连接，上位机使用GNU Radio搭建发送流图控制信号的发送。
+通常情况下，USRP N210接收的信号质量更高，能得到更好的实验效果。
 
 \section{频移标签设计}
+频移反向散射标签的设计与江等人的工作~\cite{jiang2021long}类似，信号反射模块硬件部分使用射频开关ADG902~\cite{analog2023adg}，通过STM32单片机控制射频开关的闭合与断开，从而实现频移反向散射标签的频率调制。
+可通过电脑烧写STM32单片机程序设置不同反向散射标签的频移频率。
 
 \section{接收端设计}
+信号接收模块硬件部分使用USRP N210或HackRF One软件无线电设备，软件部分使用GNU Radio搭建。
+USRP N210通过网络电缆、HackRF One通过USB与上位机连接，上位机使用GNU Radio搭建接收流图控制信号的接收。
+GNU Radio的接收流图如图~\ref{fig:gnu-flowgraph}~所示。
+信号经由SDR接收后会分发向三个方向：
+（1）发送到GUI界面实时显示接收信号的性质；
+（2）发送到文件保存以便后续处理；
+（3）通过TCP发送到MATLAB进行在线信号处理与结果显示。
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\linewidth]{chap04/gnu_flowgraph.pdf}
+    \caption{GNU Radio 信号接收流图}
+    \label{fig:gnu-flowgraph}
+\end{figure}
+
 
 \section{算法模块设计}
 
