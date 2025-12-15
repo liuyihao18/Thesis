@@ -279,7 +279,7 @@ CFO、STO和SFO对激励信号和反向散射信号的综合影响可以表示�
 虽然第一项由于$f_\text{tag}$通常只有几十kHz量级，而$\tau - \tau_2$只有纳秒级，使得其可忽略不计，但是第二项$\psi_{\text{tag}}$\footnote{$\Delta \psi_{\text{tag}} \approx 2 \pi \Delta f_\text{tag} \Delta t$可以作为一个量级上的估计。}会引入显著的相位偏移，影响感知精度。
 为了解决这个问题，本文提出了一种利用反向散射信号双边带的特性进行误差消除的方法。
 在~\ref{sec:backscatter}~节中，已经介绍了反向散射标签通过调制激励信号来生成双边带信号的原理，如图~\ref{fig:backscatter}~所示，标签生成一个频率为 $f$ 的方波，该方波可以在复数域中分解为两个频率分别为 $f$ 和 $-f$ 的正弦波。
-于是标签频率$f_\text{tag}$的漂移会同时影响到双边带信号的相位，但是影响方向相反。
+于是，标签频率$f_\text{tag}$的漂移会同时影响这两个正弦波信号的相位，但是影响方向相反。
 也就是说，有：
 \begin{equation}
     \varepsilon_{\text{tag}}^\text{upper} + \varepsilon_{\text{tag}}^\text{lower} = 0
