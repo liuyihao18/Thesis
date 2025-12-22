@@ -27,7 +27,7 @@ USRP N210通过网络电缆、HackRF One通过USB与上位机进行连接，上�
 （2）保存到文件以便后续处理；
 （3）通过TCP传输到其他程序以进行在线信号处理与结果显示。
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=1.0\linewidth]{chap04/gnu_flowgraph.pdf}
     \caption{GNU Radio 信号接收流图}
@@ -53,7 +53,7 @@ USRP N210通过网络电缆、HackRF One通过USB与上位机进行连接，上�
 该模块在消除信号相位中的所有偏移和误差后，将相位转化为目标运动距离的变化，从而计算出目标的运动频率。
 本文进一步采用联合估计算法，利用目标反射信号的幅度变化来增强对目标频率感知的精度。
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=1.0\linewidth]{chap04/design.pdf}
     \caption{系统工作流程}
@@ -69,7 +69,7 @@ USRP N210通过网络电缆、HackRF One通过USB与上位机进行连接，上�
 如图~\ref{fig:online-gui}~所示，在线数据分析程序的主要功能是处理分析通过TCP接收的GNU Radio发送的信号采样点数据，并实时显示目标感知信号的星座图（也就是复数平面的信号相量）和相位变化转换的运动距离变化图，以及最后分析得到的目标运动信息，如频率和振幅等。
 限于界面大小，在线GUI模块最多支持两个标签的同时显示。
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{chap04/online_gui.png}
     \caption{在线数据分析程序}
