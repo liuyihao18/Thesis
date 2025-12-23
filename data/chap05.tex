@@ -36,7 +36,7 @@
 通过实验测试了收发端相位校正方法在消除载波频率偏移（CFO）、采样时间偏移（STO）和采样频率偏移（SFO）中的性能表现。
 本文提出通过激励信号与反向散射信号之间的内在联系来消除这些偏移。
 实验使用软件定义无线电设备HackRF One作为发送端和接收端，实验环境为室内实验环境，发送端与接收端之间的距离约1米，频移标签位于发送端与接收端之间，频移标签保持静止状态。
-在该实验里，收发端采样率为1MHz，中心频率为915MHz，基带啁啾信号带宽为100KHz，长度为20ms，频移标签频率约253KHz。
+在该实验里，收发端采样率为1MHz，中心频率为915MHz，基带啁啾信号带宽为125KHz，长度为8.192ms，频移标签频率约253KHz。
 
 \begin{figure}[htbp]
     \centering
@@ -83,3 +83,102 @@
 可以看到，利用朴素方法补偿的信号相位很快就产生了较大偏移，使得感知完全无法进行。
 而本文提出的方法有效地解决了标签频率漂移问题，补偿后信号相位几乎保持不变。
 值得注意的是，由于标签成本低，标签频率漂移对相位的影响远超上一小节的收发端频率偏移对相位的影响，因此标签频率漂移消除方法在实际应用中尤为重要。
+
+\subsection{联合估计算法}
+
+本小节通过实验测试了联合估计算法在目标运动频率估计中的效果。
+实验设置与前两小节类似，发送端和接收端使用HackRF One软件定义无线电设备，但频移标签放置于电动导轨上控制其进行往复运动。
+由于这个实验场景位于拥挤的室内办公室，多径效应将严重扭曲标签信号的相位和幅度，从而影响频率估计的准确性。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/phase_amplitude.pdf}
+    \caption{信号相位与幅度}
+    \label{fig:phase-amplitude}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/joint_estimation.pdf}
+    \caption{联合估计算法实验结果}
+    \label{fig:joint-estimation}
+\end{figure}
+
+图~\ref{fig:phase-amplitude}~展示了信号相位与幅度的变化情况，而图~\ref{fig:joint-estimation}~展示了联合估计算法的结果。
+从图~\ref{fig:phase-amplitude}~中可以看到，由于多径效应的存在，信号相位和幅度均出现了不可预知的变化，使得频率估计出现偏差。
+而联合估计算法成功地在损失函数中找到了一个全局最小值，得到了准确的标签运动频率。
+
+\subsection{实时性}
+
+本小节测试了系统的实时性能，验证了系统在实际应用中的可行性。
+该实验使用标准的LoRa参数设置，发送端和接收端使用HackRF One软件定义无线电设备，频移标签保持静止状态。
+发送端持续发送5000个啁啾符号，总共持续约40秒的时间。
+原型系统在一台配备AMD 3700X的处理器和32GB内存的计算机上运行，各模块的处理时长和理论复杂度如表~\ref{tab:time-consumption}~所示。
+
+\begin{table}[htbp]
+    \begin{center}
+        \caption{系统各模块的时间消耗和理论复杂度\label{tab:time-consumption}}
+        \label{tab1}
+        \begin{tabular}{| c | c | c |}
+            \hline
+            模块       & 时间消耗                       (s) & 复杂度                 \\
+            \hline
+            信号解调能量集中 & $0.11$
+                     & $O(NL\log{L})$                                       \\
+            \hline
+            改进汉明窗    & $\approx 0$                    & $O(NL)$             \\
+            \hline
+            傅里叶变换    & $29.61$                        & $O(NF\log{F})$      \\
+            \hline
+            收发端相位校正  & $\approx 0$
+                     & $O(N)$                                               \\
+            \hline
+            标签频率漂移消除 & $\approx 0  $                  & $O(N)$              \\
+            \hline
+            联合估计算法   & $0.10$                         & $O(N|\mathcal{F}|)$ \\
+            \hline
+        \end{tabular}
+    \end{center}
+\end{table}
+
+其中，$L=8192$和$N=5000$代表了啁啾符号的采样点数和符号数量，$F \approx 10L = 100000$代表了傅里叶变换的点数，$|\mathcal{F}|=1000$代表了联合估计算法中频率搜索空间的大小。
+从表~\ref{tab:time-consumption}~中可以看到，系统在处理5000个符号时总共花费了约30秒的时间，远低于发送端发送数据所需的40秒时间，并且主要时间花费在于不可避免的傅里叶变换操作上。
+因此，本文提出的各算法模块均满足实时处理的要求。
+
+\subsection{端到端实验}
+
+为了验证系统在实际应用中的可行性，本文进行了端到端实验。
+实验使用USRP N210软件定义无线电作为发送端和接收端，收发端位于邻近的位置，频移标签放置在距离收发端约3米的位置。
+实验环境为实验室走廊，并且收发端和标签均使用定向天线以增强信号强度并减少多径效应的影响。
+值得注意的是，只有当收发端放置于一起，且收发端和标签之间均使用定向天线来抑制多径效应时，感知信号的相位才能准确地转化为目标物体的运动距离。
+此时，目标物体的运动距离为信号相位变化对应距离变化的一半。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.33\linewidth]{chap05/tag_direction.png}
+    \caption{端到端实验中的标签放置方式}
+    \label{fig:tag-direction}
+\end{figure}
+
+如图~\ref{fig:tag-direction}~所示，在实验过程中，频移标签连接在一个定向天线上，而定向天线与一个电动推杆连接，电动推杆将推动定向天线进行幅度为15cm的往复运动。
+类似的定向天线也连接在收发端上，保持静止并与标签连接的天线相对。
+此时得到的信号相位与幅度变化如图~\ref{fig:pa-phase-amplitude}~所示。
+从图中可以看到，信号相位的变化范围为-2.44弧度到3.05弧度，差值约5.49弧度，对应的标签运动距离变化约为$\frac{1}{2} \times \frac{5.49}{2\pi} \times \frac{3 \times 10^8}{915 \times 10^6} \approx 14.3\text{cm}$，与标签实际运动距离15cm非常接近，考虑到一些几何上的误差，实验结果与理论预期基本一致。
+而信号幅度的变化与信号相位变化模式一致，验证了本文提出的联合估计算法的有效性。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/pa_phase_amplitude.pdf}
+    \caption{端到端实验中的标签信号相位与幅度}
+    \label{fig:pa-phase-amplitude}
+\end{figure}
+
+值得一提的是，比较图~\ref{fig:phase-amplitude}~和图~\ref{fig:pa-phase-amplitude}~中的信号相位与幅度，可以发现多径效应对信号的影响相当严重。
+因此在多径丰富的环境中，本文提出的联合估计算法将发挥重要作用。
+总体而言，该端到端实验验证了本文提出的远距离多目标运动特征感知系统在实际应用中的可行性。
+在接下来的实验中，将进一步评估系统在复杂环境中的性能表现。
+
+\section{室外远距离多目标感知实验}
+
+
+
