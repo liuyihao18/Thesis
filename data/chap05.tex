@@ -3,7 +3,7 @@
 \chapter{实验结果分析}
 
 本章将对远距离多目标运动特征感知系统原型进行实验验证与性能分析。
-实验主要包含三部分，分别为模块性能测试、室外远距离多目标感知实验以及室内多目标感知实验。
+实验主要包含三部分，分别为模块性能测试、室外实验以及室内实验。
 在每部分实验中，将介绍实验环境与设置，并对实验结果进行分析。
 
 \section{模块性能测试}
@@ -178,25 +178,24 @@
 总体而言，该端到端实验验证了本文提出的远距离多目标运动特征感知系统在实际应用中的可行性。
 在接下来的实验中，将进一步评估系统在复杂环境中的性能表现。
 
-\section{室外远距离多目标感知实验}
+\section{室外实验}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\linewidth]{chap05/outdoor_scenario.pdf}
-    \caption{室外远距离多目标感知实验场景}
+    \caption{室外实验场景}
     \label{fig:outdoor-scenario}
 \end{figure}
 
 本实验场景位于室外校园道路上，如图~\ref{fig:outdoor-scenario}~所示。
 室外校园道路环境相对开阔，具有较少的多径效应影响，但因来往行人和车辆较多，环境更为复杂。
 该实验旨在测试系统原型在现实环境中的远距离多目标感知性能，包括不同收发端距离、不同标签距离、不同目标运动形式、不同干扰级别等对感知精度的影响，以验证系统在实际应用中的可行性。
-最后，通过一个双人呼吸感知的案例，展示了系统在实际应用中的潜力。
 
 \subsection{实验设置}
 
 在本实验中，发送端使用商用LoRa节点，接收端使用USRP N210软件定义无线电设备，收发端与频移标签均使用3.5dBi增益的全向天线。
 收发端工作于433MHz频段，接收端采样率设置为1MHz，基带啁啾信号扩频因子为12，带宽为500KHz，符号长度为8.192ms，发射功率为28dBm。
-标签放置于电动导轨上，电动导轨长度为30cm，通过烧写Arduino单片机控制95步进电机实现往复运动。
+标签的频移频率为200KHz到400KHz，放置于电动导轨上，电动导轨长度为30cm，通过烧写Arduino单片机控制95步进电机实现往复运动。
 导轨可以精确地控制标签以不同频率和幅度进行运动，从而模拟不同目标物体的运动方式。
 实验结果将比较仅用相位、仅用幅度以及联合使用相位和幅度三种方法的感知效果。
 
@@ -204,12 +203,12 @@
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.66\linewidth]{chap05/result_errorbar_outdoor_distance.pdf}
+    \includegraphics[width=0.66\linewidth]{chap05/result/result_errorbar_outdoor_distance.pdf}
     \caption{不同收发端距离对感知精度的影响}
     \label{fig:result-errorbar-outdoor-distance}
 \end{figure}
 
-在该实验中，标签放置于接收端30cm处以固定幅度2cm和频率0.66Hz进行运动。
+在该实验中，标签放置于接收端30cm处以固定幅度2cm和频率0.66Hz进行往复运动。
 移动发送端，使其与接收端的距离分别为50m、100m、150m、200m、300m和400m，以测试不同收发端距离对感知精度的影响。
 图~\ref{fig:result-errorbar-outdoor-distance}~展示了不同收发端距离下三种方法的感知误差。
 可以看到，随着收发端距离的增加，三种方法的感知精度均有所下降。
@@ -220,6 +219,108 @@
 
 \subsection{不同标签距离对感知精度的影响}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/result/result_errorbar_outdoor_tag_distance.pdf}
+    \caption{不同标签距离对感知精度的影响}
+    \label{fig:result-errorbar-outdoor-tag-distance}
+\end{figure}
 
+在该实验中，发送端与接收端放置于相邻位置，标签距离收发端距离分别为0.5m、1m、1.5m、2m、2.5m和3m，并以固定幅度2cm和频率0.66Hz进行往复运动，从而测试不同标签距离对感知精度的影响。
+图~\ref{fig:result-errorbar-outdoor-tag-distance}~展示了不同标签距离下三种方法的感知误差。
+可以看到，与上一个实验相比，随着标签距离的增加，三种方法的感知精度下降都更为显著。
+这主要是由于标签设计与发送端参数的选择，当啁啾信号带宽为500KHz且标签频率偏移在200KHz到400KHz之间时，频谱的部分重叠使得反向散射信号被强激励信号淹没，导致信噪比降低，从而影响感知精度。
+如果将啁啾信号的带宽调小并增加啁啾信号的持续时间，感知范围将得到极大提升，后面的室内实验将验证这一点。
+值得注意的是，联合使用相位和幅度的方法依然表现出最好的感知精度。
 
+\subsection{不同目标运动形式对感知精度的影响}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/result/result_errorbar_outdoor_motion.pdf}
+    \caption{不同标签运动距离对感知精度的影响}
+    \label{fig:result-errorbar-outdoor-motion}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/result/result_errorbar_outdoor_speed.pdf}
+    \caption{不同标签运动速度对感知精度的影响}
+    \label{fig:result-errorbar-outdoor-speed}
+\end{figure}
+
+在该实验中，发送端与接收端固定距离为150m，标签放置于距离接收端30cm处以不同运动形式进行运动。
+图~\ref{fig:result-errorbar-outdoor-motion}~展示了不同标签运动距离对感知精度的影响，图~\ref{fig:result-errorbar-outdoor-speed}~展示了不同标签运动速度对感知精度的影响。
+可以看到，标签运动形式对于感知精度几乎没有影响，在所有情形下，联合估计算法得到的平均频率感知精度均超过99.6\%。
+这表明了本文提出的方法在不同目标运动形式下均具有良好的适应性，能够准确地感知目标的运动特征。
+值得注意的是，先前工作Plantir~\cite{jiang2021sense}通过相位转换的波形图的峰谷点来估计目标运动频率，这种方法对目标运动形式较为敏感，而本文提出的联合估计算法通过优化损失函数，能够更好地收集一段时间内的目标运动信息，从而提升了对不同运动形式的适应性。
+
+\subsection{不同干扰级别对感知精度的影响}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/result/result_errorbar_outdoor_interference.pdf}
+    \caption{不同干扰级别对感知精度的影响}
+    \label{fig:result-errorbar-outdoor-interference}
+\end{figure}
+
+在该实验中，发送端与接收端固定距离为150m，标签放置于距离接收端30cm处以固定幅度2cm和频率0.66Hz进行往复运动。
+由于实验在室外校园道路环境中进行，来往的行人和车辆将对标签信号产生不同程度的干扰。
+为了测试不同干扰强度对感知精度的影响，本实验粗略地依据来往的干扰物体数量将干扰强度划分为三个不同级别：弱干扰（干扰物体小于3个）、中等干扰（干扰物体3-5个）和强干扰（干扰物体多于5个）。
+图~\ref{fig:result-errorbar-outdoor-interference}~展示了不同干扰级别下三种方法的感知误差。
+可以看到，随着干扰级别的增加，三种方法的感知精度均有所下降，但联合估计算法得到的感知精度依然超过99.5\%。
+这和~\ref{sec:anti-interference}~节中的抗干扰能力分析结果一致，只要干扰物体离收发端足够远，其影响便有限。
+这表明了本文提出的方法在面对环境干扰时具有较强的鲁棒性，能够有效地提取目标运动特征。
+
+\subsection{多标签场景}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/result/result_multitags_r_err_freq_combine.pdf}
+    \caption{多标签场景下的感知精度}
+    \label{fig:result-errorbar-outdoor-multitags}
+\end{figure}
+
+在该实验中，收发端距离仍然为150m，5个标签放置于距离接收端30cm处以固定幅度和频率进行往复运动，标签频移频率分别为253640Hz、331990Hz、312390Hz、370990Hz和333160Hz。
+为了模拟更多标签同时感知的场景，实验收集了7组发送端发送不同但正交啁啾信号时的数据，并将它们叠加在一起形成多标签场景的数据。
+图~\ref{fig:result-errorbar-outdoor-multitags}~展示了多标签场景下三种方法的感知误差。
+可以看到，由于啁啾信号相互正交且不同频移标签信号相互正交，本文提出的方法区分出了全部35个标签的感知信号，且平均频率感知准确率超过99.8\%。
+不同标签感知准确率的波动可能源于标签反射系数的不同，导致不同标签信号的SNR不同，从而影响感知精度。
+值得注意的是，实验中使用的5个标签中有2个标签频率间隔仅有1170Hz，虽然这个间隔很小，但是仍然满足了正交性约束$\left|f_2 - f_1\right|T \gg 1$，因此本文提出的方法依然很好地区分出了这两个标签信号。
+
+\section{室内实验}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.66\linewidth]{chap05/room.pdf}
+    \caption{室内实验场景}
+    \label{fig:indoor-room}
+\end{figure}
+
+本实验场景位于室内办公室环境中，如图~\ref{fig:indoor-room}~所示。
+该实验旨在测试系统能否在复杂多径环境中覆盖整个房间进行多目标感知。
+在该实验中，收发端部署在房间的对角线上，距离约6m，频移标签放置于室内不同8个位置，以固定频率和幅度进行往复运动。
+与室外实验不同，本实验使用的啁啾信号带宽为125KHz，符号长度为32.125ms，发射功率为20dBm。
+更窄的啁啾信号和更长的符号长度能够有效缓解频谱重叠问题，并增加信号能量集中方法可以汇聚的信号能量，从而提升感知范围和精度。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chap05/result/result_bar_indoor_room.pdf}
+    \caption{室内实验场景}
+    \label{fig:result-bar-indoor-room}
+\end{figure}
+
+图~\ref{fig:result-bar-indoor-room}~展示了室内实验场景下系统的感知结果。
+可以看到，联合估计算法在8个位置均表现出良好的感知精度，频率感知准确率达到99.5\%。
+而仅使用相位或幅度信息的方法在某些位置感知精度大幅下降，甚至无法感知目标。
+这主要是由于室内环境中多径效应以不同模式扭曲了信号的相位和幅度信息，导致单一信息源的感知方法失效。
+但是通过联合估计算法，能够有效结合相位和幅度信息，从而提升系统整体的感知精度。
+总体而言，室内实验验证了本文提出的远距离多目标运动特征感知系统在复杂多径环境中的可行性和有效性。
+
+\section{本章小结}
+
+本章通过实验，验证了远距离多目标运动特征感知系统原型的性能表现。
+首先，通过模块测试，确认了本文提出各种方法的有效性和实时性，以及系统原型的可行性。
+随后，通过室外实验，评估了系统在不同收发端距离、标签距离、目标运动形式和干扰级别下的感知精度，说明了本文提出的方法在各种条件下均表现出良好的感知性能。
+最后，通过室内实验，展示了系统在复杂多径环境中的应用可行性。
+总而言之，能量集中方法和窗函数确保了系统能够从接收信号中提取出微弱的标签反射信号，而收发端相位校正和标签频率漂移消除方法有效地修正了各种频率偏移对信号相位的影响，联合估计算法则通过结合相位和幅度信息，最终提升了系统的目标感知精度。
