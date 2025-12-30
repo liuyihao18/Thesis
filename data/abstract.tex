@@ -9,7 +9,7 @@
 
   本文在此基础之上进一步对频移反向散射标签的远距离多目标运动感知方法和系统展开研究。
   信号处理方面，提出共轭解调与基于概率模型的相干解调方法以汇聚分散的能量，并以改进汉明窗抑制远近效应；
-  利用激励与反向散射信号的内在联系抵消非同步收发端的载波频率偏移、采样时间偏移和采样频率偏移，并结合反向散射信号双边带特性消除标签频率漂移的影响；
+  利用激励信号与反向散射信号的内在联系抵消非同步收发端载波频率偏移、采样时间偏移和采样频率偏移的影响，并结合反向散射信号双边带特性消除标签频率漂移的影响；
   在感知层则引入联合估计算法融合相位与幅度信息，提升最终频率估计精度。
   系统实现方面，完成基于LoRa商用节点和软件定义无线电设备的收发链路、可配置频移标签以及在线/离线GUI的系统原型搭建，实现从信号采集、算法处理到结果可视化的闭环。
 
@@ -17,7 +17,7 @@
 
   % 关键词用“英文逗号”分隔，输出时会自动处理为正确的分隔符
   \thusetup{
-    keywords = {无线感知, 频移反向散射标签, 远距离, 多目标},
+    keywords = {无线感知, 频移反向散射标签, 远距离感知, 多目标感知},
   }
 \end{abstract}
 
@@ -27,14 +27,15 @@
   The core of the system lies in the introduction of an Orthogonal Sensing Model.
   In this model, chirp signals with different parameters are mutually orthogonal, and reflected signals from tags with different frequency shifts are also orthogonal, enabling the system to process complex, concurrent tag-sensing tasks.
 
-  Building upon this foundation, this paper further investigates methods and systems for long-range multi-target motion sensing using frequency-shift backscatter.
-  In terms of signal processing, conjugate demodulation and probability-model-based coherent demodulation are proposed to aggregate dispersed energy, while an improved Hamming window is employed to suppress the near-far effect.
+  Building upon this foundation, this paper further investigates methods and systems for long-range multi-target motion sensing using frequency-shift backscatter tags.
+  In terms of signal processing, conjugate demodulation and probability-model-based coherent demodulation approaches are proposed to aggregate dispersed energy, while an improved Hamming window is employed to suppress the near-far effect.
   To ensure synchronization, the intrinsic relationship between the excitation and backscatter signals is exploited to cancel Carrier Frequency Offset (CFO), Sampling Time Offset (STO), and Sampling Frequency Offset (SFO) between non-synchronized transceivers. Additionally, the double-sideband characteristics of the backscatter signal are utilized to eliminate the impact of tag frequency drift.
   At the sensing layer, a joint estimation algorithm fuses phase and amplitude information to enhance the final frequency estimation accuracy.
   In terms of sensing system, a prototype was developed comprising a transceiver link based on commercial LoRa nodes and Software-Defined Radio (SDR) equipment, configurable frequency-shift tags, and an online/offline GUI.
-  his establishes a closed-loop process from signal acquisition and algorithmic processing to result visualization.
+  This establishes a closed-loop process from signal acquisition and algorithmic processing to result visualization.
 
-  Detailed experiments were conducted to evaluate the prototype’s performance. The results demonstrate that the proposed system is highly effective for long-range multi-target sensing scenarios. The system achieves a maximum sensing distance of 400m outdoors and covers a 20m$^2$ room in multipath indoor environments. The average frequency sensing accuracy exceeds 99.5\%, and the system supports the simultaneous sensing of 35 tags in multi-target scenarios.
+  Detailed experiments were conducted to evaluate the system's performance.
+  The results demonstrate that the proposed system is highly effective for long-range multi-target sensing scenarios. The system achieves a maximum sensing distance of 400m outdoors and covers a 20m$^2$ room in multipath indoor environments. The average frequency sensing accuracy exceeds 99.5\%, and the system supports the simultaneous sensing of 35 tags in multi-target scenarios.
 
   % Use comma as separator when inputting
   \thusetup{
