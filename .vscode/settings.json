@@ -3,14 +3,14 @@
         {
             "name": "latexmk (xelatex)",
             "tools": [
-                "unpack-thuthesis",
+                // "unpack-thuthesis",
                 "xelatexmk"
             ]
         },
         {
             "name": "latexmk (lualatex)",
             "tools": [
-                "unpack-thuthesis",
+                // "unpack-thuthesis",
                 "lualatexmk"
             ]
         },
