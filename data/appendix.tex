@@ -2,3 +2,287 @@
 
 \chapter{椭圆轨迹追踪与定位} \label{appendix:ellipse}
 
+在本文提出的面向频移标签的感知模型当中，能够测量发送端到标签加上标签到接收端的总距离和（椭圆模型），而不是单独的发送端到标签或标签到接收端的距离（圆模型）。
+因此，与传统的面向RFID标签等的感知模型不同，文本进行标签轨迹追踪或定位时无法直接使用传统的以圆为基础的方法进行求解。
+在本附录中，将提出适用于本文系统的基于椭圆的轨迹追踪与定位方法。
+
+\section{椭圆轨迹追踪}
+
+对于轨迹追踪问题，很重要的一点就是估计标签在每个时间点的位置。
+然而，由于本文系统使用的是单频信号，因此只能测量距离的变化量，无法直接得到标签在每个时间点的绝对距离值。
+但是，如果有多组收发端的距离和变化量，则可以通过这些变化量估计出标签的速度，进而估计出标签在相邻时间点的位置变化，从而实现轨迹追踪。
+
+\subsection{速度分量估计}
+
+一组收发端可以提供一个距离和变化量的测量值，从而估计出速度在一个方向上的分量。
+先考虑椭圆的标准形式，即发送端与接收端位于椭圆的两个焦点上，分别为$P_1(-c, 0)$和$P_2(c, 0)$，而标签位于椭圆上，其坐标为$Q(x_0, y_0)$，且与收发端距离和为$2a$，即：
+\begin{equation}
+    |P_1Q| + |QP_2| = 2a
+\end{equation}
+
+设标签在$\Delta t$后移动到新位置$Q'(x_0', y_0')$，则新的距离和为$2a'$，满足：
+\begin{equation}
+    |P_1Q'| + |Q'P_2| = 2a'
+\end{equation}
+
+本文系统能够测量得到的是距离和的变化量，即：
+\begin{equation}
+    \Delta d = 2(a' - a)
+\end{equation}
+
+于是问题形式化为，已知$P_1$、$P_2$、$Q$\footnote{不妨先假设标签的初始位置已知，下一小节将继续讨论如何估计标签的初始位置。}的坐标和距离和的变化量$\Delta d$，如何求解标签在$\Delta t$内的位移向量沿椭圆的法向分量\footnote{类比以圆为基础的追踪模型，只能求得标签位移向量沿径向的分量。}。
+
+由于此时椭圆是标准形式，可以写出椭圆的标准方程，并将$Q$点和$Q'$的坐标参数化表示为：
+\begin{equation}
+    \frac{x^2}{a^2} + \frac{y^2}{b^2} = 1
+\end{equation}
+\begin{equation}
+    Q = (x_0, y_0) = (a\cos\theta, b\sin\theta)
+\end{equation}
+\begin{equation}
+    Q' = (x_0', y_0') = (a'\cos\theta', b'\sin\theta')
+\end{equation}
+
+椭圆方程对$x$求导，得到椭圆在任意点的切线斜率可以表示为：
+\begin{equation}
+    \frac{2x}{a^2} + \frac{2yy'}{b^2} = 0
+\end{equation}
+\begin{equation}
+    y' = -\frac{b^2x}{a^2y}
+\end{equation}
+
+于是，椭圆在点$Q$处的切向量可以表示为：
+\begin{equation}
+    k = -\frac{b^2x_0}{a^2y_0} = -\frac{b\cos\theta}{a\sin\theta}
+\end{equation}
+\begin{equation}
+    \vec{k} = (a\sin\theta, -b\cos\theta)
+\end{equation}
+
+进而得出椭圆在点$Q$处的法向量\footnote{法向量需要归一化。}为：
+\begin{equation}
+    n = -\frac{1}{k} = \frac{a^2y_0}{b^2x_0} = \frac{a\sin\theta}{b\cos\theta}
+\end{equation}
+\begin{equation}
+    \vec{n} = \frac{1}{\sqrt{b^2\cos^2\theta + a^2\sin^2\theta}}(b\cos\theta, a\sin\theta) = (n_x, n_y)
+\end{equation}
+
+设标签沿法向的位移为$\Delta r$，则有：
+\begin{equation}
+    Q' = Q + \Delta r \cdot \vec{n} = (a\cos\theta + \Delta r \cdot n_x, b\sin\theta + \Delta r \cdot n_y)
+\end{equation}
+
+将$Q'$的坐标代入距离和方程，得到：
+\begin{equation}
+    \begin{cases}
+        a \cos\theta + \Delta r \cdot n_x = a'\cos\theta' \\
+        b \sin\theta + \Delta r \cdot n_y = b'\sin\theta'
+    \end{cases}
+\end{equation}
+
+根据$P_1$、$P_2$、$Q$的坐标可以求解出$a$、$b$和$\theta_1$，根据距离和变化量$\Delta d$可以求解出$a'$和$b'$，于是方程仅剩$\Delta r$和$\theta_2$两个未知数，进而解出$\Delta r$：
+\begin{align}
+    a      & = \frac{(|P_1Q| + |QP_2|)}{2} \\
+    c      & = \frac{|P_1P_2|}{2}          \\
+    b      & = \sqrt{a^2 - c^2}            \\
+    \theta & = \arctan(\frac{y_0}{x_0})    \\
+    a'     & = a + \frac{\Delta d}{2}      \\
+    b'     & = \sqrt{a'^2 - c^2}
+\end{align}
+\begin{equation}
+    \Delta r = -\frac{a'^2bn_y\sin\theta + ab'^2n_x\cos\theta \pm u }{a'^2n_y^2 + b'^2n_x^2}
+\end{equation}
+\begin{equation}
+    u = a'b'\sqrt{-a^2n_y^2\cos^2\theta-b^2n_x^2\sin^2\theta+2abn_xn_y\cos\theta\sin\theta+a'^2n_y^2 + b'^2n_x^2}
+\end{equation}
+
+假设距离在相邻时间内的变化量较小，则取上式中绝对值较小的解。
+最终，速度沿法向的分量可以表示为：
+\begin{equation}
+    \vec{v} = \frac{\Delta r}{\Delta t} \vec{n}
+\end{equation}
+
+在非标准形式椭圆的情况下，可以通过坐标变换将其转换为标准形式，然后使用上述方法进行计算。
+设收发端位置分别为$P_1(x_1, y_1)$和$P_2(x_2, y_2)$，则可以计算出中点位置$M$和旋转角度$\phi$：
+\begin{equation}
+    M = \left(\frac{x_1 + x_2}{2}, \frac{y_1 + y_2}{2}\right)
+\end{equation}
+\begin{equation}
+    \phi = \arctan\left(\frac{y_2 - y_1}{x_2 - x_1}\right)
+\end{equation}
+
+于是坐标变换矩阵为：
+\begin{equation}
+    R = \begin{bmatrix}
+        \cos(-\phi) & -\sin(-\phi) & 0 \\
+        \sin(-\phi) & \cos(-\phi)  & 0 \\
+        0           & 0            & 1
+    \end{bmatrix}
+\end{equation}
+\begin{equation}
+    T = \begin{bmatrix}
+        1 & 0 & -M_x \\
+        0 & 1 & -M_y \\
+        0 & 0 & 1
+    \end{bmatrix}
+\end{equation}
+
+于是，任意点$P(x, y)$在新坐标系下的坐标$P'(x', y')$可以表示为：
+\begin{equation}
+    P' = R \cdot T \cdot [P, 1]^\mathrm{T}
+\end{equation}
+
+求解后的速度分量需要通过逆变换转换回原坐标系下：
+\begin{equation}
+    \vec{v}' = R^{-1} \cdot \vec{v}
+\end{equation}
+
+\subsection{速度估计}
+
+通过多组收发端的距离和变化量测量值，可以得到多个速度分量的估计值。
+而速度估计可以形式化为一个优化问题，设有$M$组收发端，每组收发端提供一个速度分量估计值$\hat{\vec{v}}_i = [\hat{x}_i, \hat{y}_i]^\mathrm{T}$，设最优速度为$\vec{v} = [x, y]^\mathrm{T}$，则优化目标可以写作：
+\begin{equation}
+    \mathop{\arg\min}_{\vec{v}} \sum_i\Vert |\vec{v}_i| - |\hat{\vec{v}}_i| \Vert_2^2
+\end{equation}
+
+其中，$\vec{v}_i$表示速度$\vec{v}$在第$i$组收发端法向量方向上的投影，可以表示为：
+\begin{equation}
+    |\vec{v}_i| = |v|\cos\langle v, \hat{\vec{v}}_i\rangle = \frac{\vec{v}\cdot\hat{\vec{v}}_i}{|\hat{\vec{v}}_i|} = \frac{x\hat{x}_i+y\hat{y}_i}{|\hat{\vec{v}}_i|}
+\end{equation}
+
+设目标函数为：
+\begin{equation}
+    \begin{aligned}
+        L
+        = & \sum_i\Vert |\vec{v}_i| - |\hat{\vec{v}}_i| \Vert_2^2                                                                \\
+        = & \sum_i \left\Vert \frac{x\hat{x}_i+y\hat{y}_i}{|\hat{\vec{v}}_i|} - |\hat{\vec{v}}_i| \right\Vert_2^2                \\
+        = & \sum_i\left(\frac{x\hat{x}_i}{|\hat{\vec{v}}_i|} + \frac{y\hat{y}_i}{|\hat{\vec{v}}_i|} - |\hat{\vec{v}}_i|\right)^2
+    \end{aligned}
+\end{equation}
+
+求$L$对$x$和$y$的偏导数，并令其为0，得到：
+\begin{equation}
+    \begin{aligned}
+        \frac{1}{2} \frac{\partial L}{\partial x} & = \sum_i \left(\frac{x_i}{|\hat{\vec{v}}_i|}x + \frac{y_i}{|\hat{\vec{v}}_i|}y - |\hat{\vec{v}}_i|\right)\frac{x_i}{|\hat{\vec{v}}_i|} \\
+                                                  & = \sum_i \frac{x_i^2}{|\hat{\vec{v}}_i|^2}x + \sum_i \frac{x_iy_i}{|\hat{\vec{v}}_i|^2}y - \sum_i x_i                                  \\
+                                                  & = 0
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \frac{1}{2}\frac{\partial L}{\partial y} & = \sum_i \left(\frac{x_i}{|\hat{\vec{v}}_i|}x + \frac{y_i}{|\hat{\vec{v}}_i|}y - |\hat{\vec{v}}_i|\right)\frac{y_i}{|\hat{\vec{v}}_i|} \\
+                                                 & = \sum_i \frac{x_iy_i}{|\hat{\vec{v}}_i|^2}x + \sum_i \frac{y_i^2}{|\hat{\vec{v}}_i|^2}y - \sum_i y_i                                  \\ & = 0
+    \end{aligned}
+\end{equation}
+
+设：
+\begin{align}
+    a & = \sum_i \frac{x_i^2}{|\hat{\vec{v}}_i|^2} = \sum_i \frac{x_i^2}{x_i^2 + y_i^2}   \\
+    b & = \sum_i \frac{x_iy_i}{|\hat{\vec{v}}_i|^2} = \sum_i \frac{x_iy_i}{x_i^2 + y_i^2} \\
+    c & = \sum_i \frac{y_i^2}{|\hat{\vec{v}}_i|^2} = \sum_i \frac{y_i^2}{x_i^2 + y_i^2}   \\
+    d & = \sum_i x_i                                                                      \\
+    e & = \sum_i y_i
+\end{align}
+
+则方程的解为：
+\begin{align}
+    x & = \frac{cd - be}{ac - b^2} \\
+    y & = \frac{bd - ae}{b^2 - ac}
+\end{align}
+
+\subsection{轨迹估计}
+
+使用上述方法，可以估计出标签在每个时间点的速度，进而通过积分得到标签的轨迹。
+设标签在$t$时刻的位置为$Q(t)$，速度为$\vec{v}(t)$，则标签在$t+\Delta t$时刻的位置可以表示为：
+\begin{equation}
+    Q(t + \Delta t) = Q(t) + \vec{v}(t) \cdot \Delta t
+\end{equation}
+
+图~\ref{fig:tracking_result}~是一个仿真结果，展示了基于椭圆轨迹追踪方法的效果，其中标签从$(2,2)$开始移动，红色和蓝色分别是收发端位置，可以看到，该方法成功求解出了标签的轨迹。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{appendix/tracking_result.pdf}
+    \caption{椭圆轨迹追踪效果}
+    \label{fig:tracking_result}
+\end{figure}
+
+\subsection{初始位置估计}
+
+在实际应用中，标签的初始位置通常是未知的，因此需要通过其他方法进行估计。
+基于轨迹追踪方法，可以在预设的范围内假定标签的初始位置，然后根据距离和变化量的测量结果推导出一段标签的轨迹并得到对应时刻信号相位的预测值，最后通过与实际信号相位的测量值进行比较，选择误差最小的初始位置作为标签初始位置的估计值。
+这个方法在论文Tagoram中有详细的描述，只需将其中相位预测值计算的步骤改为使用标签到收发端的距离和即可，在此不再展开。
+
+图~\ref{fig:initial_position_estimation}~是同一个仿真结果，展示了基于轨迹追踪方法的标签位置估计效果\footnote{因为仿真没有设备引入的误差，所以可以仅使用Tagoram论文中介绍的Augmented Hologram图。}，其中估计出的位置是$(2, 2.05)$，与真实位置$(2, 2)$非常接近。
+这类方法的本质是用时间信息来换取空间定位的精度，因此更长时间的测量数据通常会带来更高的定位精度。
+但是，过长的时间也有可能引入更多的累计误差，并且增加计算复杂度，因此需要在实际应用中进行权衡。
+另一方面，更多的收发端也会带来更高的定位精度，得益于本文的正交感知模型，发送端和接收端可以互相协作，$M$个发送端和$N$个接收端将组成$M\times N$组收发端，从而显著增加测量数据量。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{appendix/initial_position_estimation2.pdf}
+    \caption{初始位置估计效果}
+    \label{fig:initial_position_estimation}
+\end{figure}
+
+总的来说，基于椭圆的轨迹追踪方法和初始位置估计方法，有望将本文提出的系统从单纯的运动检测扩展到更精确的轨迹追踪和定位应用中。
+然而，在这个过程中仍然将面临一些挑战，尤其是各种误差的影响，例如多径效应等等，上述方法仅经过仿真验证，未来仍需在实际系统中进行测试和改进。
+
+\section{椭圆定位}
+
+如果本文提出的系统使用扩频信号作为激励信号，则可以通过测量距离和的绝对值来实现标签定位，例如本节提出的椭圆三边定位方法。
+设有多组收发端$P_1^{(i)} = (x_1^{(i)}, y_1^{(i)})$和$P_2^{(i)} = (x_2^{(i)}, y_2^{(i)})$，标签位置为$Q = (x, y)$，则每组收发端测量的距离和为：
+\begin{equation}
+    d_i = |P_1^{(i)}Q| + |QP_2^{(i)}|
+\end{equation}
+
+将距离和方程展开，可以得到目标函数：
+\begin{equation}
+    \begin{aligned}
+        L
+        = & \sum_i \left(\sqrt{(x - x_1^{(i)})^2 + (y - y_1^{(i)})^2} + \sqrt{(x - x_2^{(i)})^2 + (y - y_2^{(i)})^2} - d_i\right)^2
+    \end{aligned}
+\end{equation}
+
+使用梯度下降的方法求解，其梯度为：
+\begin{equation}
+    \begin{aligned}
+        \frac{\partial L}{\partial x} = 2 \sum_{i=1}^I & \left(
+        \sqrt{\left(x - x_1^{(i)}\right) ^2 + \left(y - y_1^{(i)}\right) ^2} + \sqrt{\left(x - x_2^{(i)}\right) ^2 + \left(y - y_2^{(i)}\right) ^2} - d_i
+        \right)                                                       \\
+                                                       & \cdot \left(
+        \frac{\left(x-x_1^{(i)}\right)}{\sqrt{\left(x - x_1^{(i)}\right) ^2 + \left(y - y_1^{(i)}\right) ^2}} +
+        \frac{\left(x-x_2^{(i)}\right)}{\sqrt{\left(x - x_2^{(i)}\right) ^2 + \left(y - y_2^{(i)}\right) ^2}}
+        \right)
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \frac{\partial L}{\partial y} = 2 \sum_{i=1}^I & \left(
+        \sqrt{\left(x - x_1^{(i)}\right) ^2 + \left(y - y_1^{(i)}\right) ^2} + \sqrt{\left(x - x_2^{(i)}\right) ^2 + \left(y - y_2^{(i)}\right) ^2} - d_i
+        \right)                                                 \\
+                                                       & \cdot
+        \left(
+        \frac{\left(y-y_1^{(i)}\right)}{\sqrt{\left(x - x_1^{(i)}\right) ^2 + \left(y - y_1^{(i)}\right) ^2}} +
+        \frac{\left(y-y_2^{(i)}\right)}{\sqrt{\left(x - x_2^{(i)}\right) ^2 + \left(y - y_2^{(i)}\right) ^2}}
+        \right)
+    \end{aligned}
+\end{equation}
+
+更新公式为：
+\begin{equation}
+    x_{t+1} = x_t - \eta \frac{\partial L}{\partial x}
+\end{equation}
+\begin{equation}
+    y_{t+1} = y_t - \eta \frac{\partial L}{\partial y}
+\end{equation}
+
+图~\ref{fig:ellipse_localization}~是一个仿真结果，展示了基于椭圆三边定位方法的效果，仿真时加入了高斯噪声，红色和蓝色分别是收发端位置，迭代$10000$轮，学习率设置为$0.001$。
+可以看到，该方法成功求解出了标签的位置，与真实位置非常接近。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.55\linewidth]{appendix/ellipse_localization.pdf}
+    \caption{椭圆三边定位效果}
+    \label{fig:ellipse_localization}
+\end{figure}
