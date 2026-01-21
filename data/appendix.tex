@@ -41,6 +41,7 @@
 \end{equation}
 \begin{equation}
     Q' = (x_0', y_0') = (a'\cos\theta', b'\sin\theta')
+    \label{eq:appendix:ellipse_Q_prime1}
 \end{equation}
 
 椭圆方程对$x$求导，得到椭圆在任意点的切线斜率可以表示为：
@@ -70,9 +71,10 @@
 设标签沿法向的位移为$\Delta r$，则有：
 \begin{equation}
     Q' = Q + \Delta r \cdot \vec{n} = (a\cos\theta + \Delta r \cdot n_x, b\sin\theta + \Delta r \cdot n_y)
+    \label{eq:appendix:ellipse_Q_prime2}
 \end{equation}
 
-将$Q'$的坐标代入距离和方程，得到：
+联立公式~\eqref{eq:appendix:ellipse_Q_prime1}~和~\eqref{eq:appendix:ellipse_Q_prime2}，得到：
 \begin{equation}
     \begin{cases}
         a \cos\theta + \Delta r \cdot n_x = a'\cos\theta' \\
